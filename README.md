@@ -1,12 +1,7 @@
-# React + Vite
+# My First React Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a simple React application that demonstrates how to create and handle forms in React. It sets up a form with two input fields: one for a username and one for a password. The inputs are **controlled components**, meaning their values are managed by React state using the `useState hook`.
 
-Currently, two official plugins are available:
+When the user types into the input fields, the `handleUsername` and `handlePassword` functions update the state with the current values. When the form is submitted, the `formSubmit` function prevents the page from refreshing and logs the entered username and password to the `console`.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+The project uses `ReactDOM’s createRoot` to render the main component into the root div. The main component, `MyApp`, contains the form and its event handlers.
