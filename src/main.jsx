@@ -25,9 +25,9 @@ function MyApp() {
 
   return (
     <form onSubmit={formSubmit}>
-      <label>Username: <input type='text' onChange={handleUsername} /></label><br />
-      <label>Password: <input type='password' onChange={handlePassword} /></label> <br />
-      <input type='submit'/>
+      <label class="fs-4">Username: <input type='text' onChange={handleUsername} class="form-control size fs-4 rounded-top rounded-bottom"/></label><br /><br />
+      <label class="fs-4">Password: <input type='password' onChange={handlePassword} class="form-control size fs-4 rounded-top rounded-bottom"/></label><br /><br />
+      <input type='submit' class="btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom"/>
     </form>
   );
 }
