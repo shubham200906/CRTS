@@ -5,14 +5,30 @@ import App from './App.jsx'
 
 function MyApp() {
 
+  const info = {
+    username : "Shubham",
+    password : "hello"
+  }
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   function formSubmit(event) {
 
     event.preventDefault();
-    console.log(username);
-    console.log(password);
+
+    if(username != info['username']) {
+      console.log("Incorrect Username");
+    } else {
+      console.log("Correct Username");
+    }
+
+    
+    if(password != info['password']) {
+      console.log("Incorrect Password");
+    } else {
+      console.log("Correct Password");
+    }
   }
 
   function handleUsername(event) {
