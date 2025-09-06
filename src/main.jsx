@@ -10,8 +10,6 @@ function MyApp() {
   const [userTrue, setUserTrue] = useState(true);
   const [passTrue, setPassTrue] = useState(true);
 
-  const [data, setData] = useState(true);
-
   function formSubmit(event) {
     event.preventDefault();
 
@@ -19,23 +17,16 @@ function MyApp() {
     .then(response => response.text())
     .then(result => {
       
-      setData(result);
       console.log(result);
-
-      if(result.includes("Incorrect Username")) {
-        setUserTrue(false);
-      }
-
-      if(result.includes("Incorrect Password")) {
-        setPassTrue(false);
-      }
 
       if(result.includes("Incorrect Username and Password")) {
         setUserTrue(false);
         setPassTrue(false);
-      }
-
-      if(result.includes("Correct Username and Password")) {
+      } else if(result.includes("Incorrect Username")) {
+        setUserTrue(false);
+      } else if(result.includes("Incorrect Password")) {
+        setPassTrue(false);
+      } else if(result.includes("Correct Username and Password")) {
         setUserTrue(true);
         setPassTrue(true);
       }
