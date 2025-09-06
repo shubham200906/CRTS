@@ -15,9 +15,7 @@ function MyApp() {
   function formSubmit(event) {
     event.preventDefault();
 
-    fetch(`http://localhost:3000/?username=${username}&password=${password}`, {
-      method: "GET",
-    })
+    fetch(`http://localhost:3000/?username=${username}&password=${password}`)
     .then(response => response.text())
     .then(result => {
       
