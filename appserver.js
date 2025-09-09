@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
   } else if(req.query.password != info["password"]) {
     res.send("Incorrect Password");
   } else {
-    res.send("Correct Username & Password");
+    res.send("Correct Username and Password");
   }
 });
 

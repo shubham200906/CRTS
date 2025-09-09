@@ -1,9 +1,15 @@
-import { StrictMode, useEffect, useState } from 'react'
+import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
+import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
+
+function Home() {
+  return (<h1>Welcome to the Home Page!</h1>);
+}
 
 function MyApp() {
+  const navigate = useNavigate();
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -29,6 +35,8 @@ function MyApp() {
       } else if(result.includes("Correct Username and Password")) {
         setUserTrue(true);
         setPassTrue(true);
+        console.log("Navigating to home");
+        navigate("/home");
       }
     });
   }
@@ -43,18 +51,20 @@ function MyApp() {
     setPassTrue(true);
   }
 
-  // in formsubmit, bring it back to the code it was before (it should perform the code locally - you have info in react)
-  // send request to app.js (call localhost:3000), and in app.js create method called validateUser from the client and sends a response saying valid/invalid username/password
-
   return (
     <form onSubmit={formSubmit} method="get">
-      <label class="fs-4">Username: <input type='text' onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br /><br />
-      <label class="fs-4">Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom" ${passTrue ? "bg-white" : "bg-danger"}`} name="password"/></label><br /><br />
-      <input type='submit' class="btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom"/>
+      <label className={`fs-4`}>Username: <input type='text' onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br /><br />
+      <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom ${passTrue ? "bg-white" : "bg-danger"}`} name="password"/></label><br /><br />
+      <input type='submit' className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
     </form>
   );
 }
 
 createRoot(document.getElementById('root')).render(
-  <MyApp />
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={(<MyApp />)}></Route>
+      <Route path="/home" element={(<Home />)}></Route>
+    </Routes>
+  </BrowserRouter>
 )
