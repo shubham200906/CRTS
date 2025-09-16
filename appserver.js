@@ -1,27 +1,98 @@
-import express from "express";
-import cors from "cors";
+import express from 'express';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import cors from 'cors';
+
+dotenv.config();
 const app = express();
+const PORT = process.env.PORT || "7000";
+const MONGOURL = process.env.MONGO_URL;
+
+mongoose.connect(MONGOURL).then(() => {
+  console.log("Database is connected.");
+}).catch((error) => {console.log(error)});
+
 
 app.use(cors({
   origin : "http://localhost:5173"
 }));
 
 const info = {
-    username : "Shubham",
-    password : "hello"
+    firstname : ["Shubham", "username"],
+    lastname : ["Gupta", "password"],
+    username : ["Shubham", "username"],
+    password : ["Gupta", "password"]
 };
+
+const userSchema = new mongoose.Schema({
+  firstname : {
+    type : String,
+    require : true
+  },
+  lastname : {
+    type : String,
+    require : true
+  },
+  username : {
+    type : String,
+    require : true
+  },
+  password : {
+    type : String,
+    require : true
+  },
+});
+
+const user = mongoose.model("User", userSchema);
 
 app.get("/", (req, res) => {
 
-  if(req.query.username != info["username"] && req.query.password != info["password"]) {
-    res.send("Incorrect Username and Password");
-  } else if(req.query.username != info["username"]) {
-   res.send("Incorrect Username");
-  } else if(req.query.password != info["password"]) {
-    res.send("Incorrect Password");
-  } else {
-    res.send("Correct Username and Password");
-  }
+  console.log("login");
+
+  console.log("Username: " + req.query.username + " ");
+  console.log("Password: " + req.query.password);
+
+  user.findOne({username:req.query.username}).then((users) => {
+      if(users) {
+        if(req.query.password == users.password) {
+          console.log("Correct Username and Password " + users.firstname + " " + users.lastname);
+          res.send("Correct Username and Password " + users.firstname + " " + users.lastname);
+        } else {
+          console.log("Incorrect Password");
+          res.send("Incorrect Password");
+        }
+      } else {
+        user.findOne({password:req.query.password}).then((userPass) => {
+          if(userPass) {
+            console.log("Incorrect Username");
+            res.send("Incorrect Username");
+          } else {
+            console.log("Incorrect Username and Password");
+            res.send("Incorrect Username and Password");
+          }
+        })
+      }
+   })
+})
+
+app.get("/signup", (req, res) => {
+
+  console.log("sign up");
+
+  console.log("Firstname: " + req.query.firstname + " ");
+  console.log("Lastname: " + req.query.lastname + " ");
+  console.log("Username: " + req.query.username + " ");
+  console.log("Password: " + req.query.password);
+
+  const user1 = new user({
+      firstname : req.query.firstname,
+      lastname : req.query.lastname,
+      username : req.query.username,
+      password : req.query.password
+  });
+  user1.save();
+  console.log("New User Created");
+  res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
 });
 
 app.listen(3000, () => {
