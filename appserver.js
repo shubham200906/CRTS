@@ -84,15 +84,46 @@ app.get("/signup", (req, res) => {
   console.log("Username: " + req.query.username + " ");
   console.log("Password: " + req.query.password);
 
-  const user1 = new user({
-      firstname : req.query.firstname,
-      lastname : req.query.lastname,
-      username : req.query.username,
-      password : req.query.password
+  user.findOne({username:req.query.username}).then((users) => {
+    if(users) {
+      res.send("Username already exists. Please create a different username.");
+    } else {
+      const user1 = new user({
+        firstname : req.query.firstname,
+        lastname : req.query.lastname,
+        username : req.query.username,
+        password : req.query.password
+      });
+      user1.save();
+      console.log("New User Created");
+      res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+    }
   });
-  user1.save();
-  console.log("New User Created");
-  res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+});
+
+app.get("/update", (req, res) => {
+  console.log("Firstname: " + req.query.firstname + " ");
+  console.log("Lastname: " + req.query.lastname + " ");
+  console.log("Username: " + req.query.username + " ");
+  console.log("Password: " + req.query.password);
+
+  user.findOne({username:req.query.username}).then((users) => {
+    if(users) {
+      users.firstname = req.query.firstname;
+      users.lastname = req.query.lastname;
+      users.password = req.query.password;
+
+      users.save().then(() => {
+        console.log("User updated");
+        res.send(users.firstname + " " + users.lastname + " " + users.password);
+      })
+
+    } else {
+      console.log("User not found");
+      res.send("User not found");
+    }
+  });
+
 });
 
 app.listen(3000, () => {

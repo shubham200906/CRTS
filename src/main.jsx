@@ -2,8 +2,51 @@ import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { BrowserRouter, Routes, Route, useNavigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate, Link } from 'react-router-dom'
 
+
+function Update({firstName, lastName, username, password, setFirstName, setLastName, setPassword}) {
+
+  const navigate = useNavigate();
+
+  function formSubmit(event) {
+    event.preventDefault();
+
+    fetch(`http://localhost:3000/update?firstname=${firstName}&lastname=${lastName}&username=${username}&password=${password}`)
+    .then(response => response.text())
+    .then(result => {
+      if(!result.includes("User not found")) {
+        const names = result.split(" ");
+        setFirstName(names[0]);
+        setLastName(names[1]);
+        setPassword(names[2]);
+        navigate("/home");
+      }
+    })
+  }
+
+  function handlePassword(event) {
+    setPassword(event.target.value);
+  }
+
+  function handleFirstName(event) {
+    setFirstName(event.target.value);
+  }
+
+  function handleLastName(event) {
+    setLastName(event.target.value);
+  }
+
+  return(
+    <form onSubmit={formSubmit} method="get">
+      <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
+      <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
+      <input type="hidden" value={username} />
+      <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
+      <input type='submit' value="Update" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
+  </form>
+  );
+}
 
 function Home({firstName, lastName, setFirstName, setLastName, setUsername, setPassword}) {
 
@@ -18,15 +61,31 @@ function Home({firstName, lastName, setFirstName, setLastName, setUsername, setP
   }
 
   return (
+    <>
+    <nav class="navbar navbar-expand-sm navbar-light bg-light fixed-top">
+      <div class="collapse navbar-collapse">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <Link to="/" className="nav-link mb-0 h5">Home</Link>
+          </li>
+          <li class="nav-item">
+            <Link to="/update" className="nav-link mb-0 h5">Update User</Link>
+          </li>
+        </ul>
+      </div>
+    </nav>
     <div>
       <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
       <h3><a href="/" onClick={handleSignOut}>Sign Out</a></h3>
     </div>
+    </>
   );
 }
 
 function SignUp({firstName, lastName, username, password, setFirstName, setLastName, setUsername, setPassword}) {
   const navigate = useNavigate();
+
+  const [userTrue, setUserTrue] = useState(true);
 
   function formSubmit(event) {
     event.preventDefault();
@@ -36,16 +95,21 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
     .then(result => {
       
       console.log(result);
-      const names = result.split(" ");
 
-      setFirstName(names[0]);
-      setLastName(names[1]);
-      setUsername(names[2]);
-      setPassword(names[3]);
+      if(result.includes("Username already exists")) {
+        setUserTrue(false);
+      } else {
+        setUserTrue(true);
+
+        const names = result.split(" ");
+        setFirstName(names[0]);
+        setLastName(names[1]);
+        setUsername(names[2]);
+        setPassword(names[3]);
+        navigate("/home");
+      }
 
     });
-
-    navigate("/home");
   }
 
   function handleUsername(event) {
@@ -68,9 +132,9 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
     <form onSubmit={formSubmit} method="get">
       <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
       <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
-      <label className={`fs-4`}>Email: <input type='Email' value={username} onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom`} name="username"/></label><br /><br />
+      <label className={`fs-4`}>Email: <input type='email' value={username} onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br /><br />
       <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
-      <input type='submit' value="Log In" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
+      <input type='submit' value="Sign Up" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
     </form>
   );
 }
@@ -145,6 +209,7 @@ function AppWrapper() {
       <Route path="/" element={<Login firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword}/>}></Route>
       <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword}/>}></Route>
       <Route path="/home" element={<Home firstName={fname} lastName={lname} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword}/>}></Route>
+      <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setPassword={setPassword}/>}></Route>
     </Routes>
   </BrowserRouter>
   );
