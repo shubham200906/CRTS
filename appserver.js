@@ -53,25 +53,28 @@ app.get("/", (req, res) => {
   console.log("Password: " + req.query.password);
 
   user.findOne({username:req.query.username}).then((users) => {
-      if(users) {
-        if(req.query.password == users.password) {
-          console.log("Correct Username and Password " + users.firstname + " " + users.lastname);
-          res.send("Correct Username and Password " + users.firstname + " " + users.lastname);
-        } else {
-          console.log("Incorrect Password");
-          res.send("Incorrect Password");
-        }
+    if(users) {
+      if(users.username == "shubhadmin@gmail.com" && users.password == "password") {
+      console.log("Admin User");
+      res.send("Admin User: " + users.firstname + " " + users.lastname);
+      } else if(req.query.password == users.password) {
+        console.log("Correct Username and Password " + users.firstname + " " + users.lastname);
+        res.send("Correct Username and Password " + users.firstname + " " + users.lastname);
       } else {
-        user.findOne({password:req.query.password}).then((userPass) => {
-          if(userPass) {
-            console.log("Incorrect Username");
-            res.send("Incorrect Username");
-          } else {
-            console.log("Incorrect Username and Password");
-            res.send("Incorrect Username and Password");
-          }
-        })
+        console.log("Incorrect Password");
+        res.send("Incorrect Password");
       }
+    } else {
+      user.findOne({password:req.query.password}).then((userPass) => {
+        if(userPass) {
+          console.log("Incorrect Username");
+          res.send("Incorrect Username");
+        } else {
+          console.log("Incorrect Username and Password");
+          res.send("Incorrect Username and Password");
+        }
+      })
+    }
    })
 })
 
@@ -124,6 +127,14 @@ app.get("/update", (req, res) => {
     }
   });
 
+});
+
+app.get("/home", (req, res) => {
+  if(req.query.title) {
+    user.find({}).then((users) => {
+      res.json(users);
+    })
+  }
 });
 
 app.listen(3000, () => {

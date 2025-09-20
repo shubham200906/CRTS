@@ -1,11 +1,11 @@
-import { StrictMode, useState } from 'react'
+import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { BrowserRouter, Routes, Route, useNavigate, Link } from 'react-router-dom'
 
 
-function Update({firstName, lastName, username, password, setFirstName, setLastName, setPassword}) {
+function Update({firstName, lastName, username, password, title, setFirstName, setLastName, setPassword}) {
 
   const navigate = useNavigate();
 
@@ -37,49 +37,144 @@ function Update({firstName, lastName, username, password, setFirstName, setLastN
     setLastName(event.target.value);
   }
 
-  return(
-    <form onSubmit={formSubmit} method="get">
-      <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
-      <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
-      <input type="hidden" value={username} />
-      <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
-      <input type='submit' value="Update" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
-  </form>
-  );
+  if(title) {
+    return (
+      <>
+        <nav className={`navbar navbar-expand-sm navbar-light bg-light fixed-top`}>
+          <div className={`container-fluid collapse navbar-collapse`}>
+            <ul className={`navbar-nav`}>
+              <li className={`nav-item`}>
+                <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
+              </li>
+              <li className={`nav-item`}>
+                <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
+              </li>
+            </ul>
+
+            <ul className={`navbar-nav ms-auto`}>
+              <li className={`nav-item`}>
+                <h5 className={`nav-link mb-0 h5`}>Admin: {firstName} {lastName}</h5>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      <h1>Update User Profile:</h1><br /><br />
+      <form onSubmit={formSubmit} method="get">
+        <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
+        <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
+        <input type="hidden" value={username} />
+        <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
+        <input type='submit' value="Update" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
+      </form>
+    </>
+    )
+  } else {
+    return (
+      <>
+        <nav className={`navbar navbar-expand-sm navbar-light bg-light fixed-top`}>
+          <div className={`collapse navbar-collapse`}>
+            <ul className={`navbar-nav`}>
+              <li className={`nav-item`}>
+                <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
+              </li>
+              <li className={`nav-item`}>
+                <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      <h1>Update User Profile:</h1><br /><br />
+      <form onSubmit={formSubmit} method="get">
+        <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
+        <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
+        <input type="hidden" value={username} />
+        <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
+        <input type='submit' value="Update" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
+      </form>
+      </>
+    );
+  }
 }
 
-function Home({firstName, lastName, setFirstName, setLastName, setUsername, setPassword}) {
+function Home({firstName, lastName, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
 
   const navigate = useNavigate();
+  const [users, setUsers] = useState("");
 
   function handleSignOut() {
     setFirstName("");
     setLastName("");
     setUsername("");
     setPassword("");
+    setTitle(false);
     navigate("/");
   }
 
-  return (
-    <>
-    <nav class="navbar navbar-expand-sm navbar-light bg-light fixed-top">
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <Link to="/" className="nav-link mb-0 h5">Home</Link>
-          </li>
-          <li class="nav-item">
-            <Link to="/update" className="nav-link mb-0 h5">Update User</Link>
-          </li>
-        </ul>
-      </div>
-    </nav>
-    <div>
-      <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
-      <h3><a href="/" onClick={handleSignOut}>Sign Out</a></h3>
-    </div>
-    </>
-  );
+  useEffect(() => {
+      if(title) {
+      fetch(`http://localhost:3000/home?title=${title}`)
+      .then(response => response.json())
+      .then(result => {
+        console.log(result);
+        let display = "";
+        for(let i = 0; i < result.length; i++) {
+          display += "First Name: " + result[i].firstname + " Last Name: " + result[i].lastname + " User Name: " + result[i].username + "\n";
+        }
+        setUsers(display);
+      })
+    }
+  }, [title])
+
+  if(title) {
+    return (
+      <>
+        <nav className={`navbar navbar-expand-sm navbar-light bg-light fixed-top`}>
+          <div className={`container-fluid collapse navbar-collapse`}>
+            <ul className={`navbar-nav`}>
+              <li className={`nav-item`}>
+                <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
+              </li>
+              <li className={`nav-item`}>
+                <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
+              </li>
+            </ul>
+
+            <ul className={`navbar-nav ms-auto`}>
+              <li className={`nav-item`}>
+                <h5 className={`nav-link mb-0 h5`}>Admin: {firstName} {lastName}</h5>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <div>
+          <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
+          <pre>{users}</pre>
+          <h3><a href="/" onClick={handleSignOut}>Sign Out</a></h3>
+        </div>
+      </>
+    )
+  } else {
+    return (
+      <>
+        <nav className={`navbar navbar-expand-sm navbar-light bg-light fixed-top`}>
+          <div className={`collapse navbar-collapse`}>
+            <ul className={`navbar-nav`}>
+              <li className={`nav-item`}>
+                <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
+              </li>
+              <li className={`nav-item`}>
+                <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
+              </li>
+            </ul>
+          </div>
+        </nav>
+        <div>
+          <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
+          <h3><a href="/" onClick={handleSignOut}>Sign Out</a></h3>
+        </div>
+      </>
+    );
+  }
 }
 
 function SignUp({firstName, lastName, username, password, setFirstName, setLastName, setUsername, setPassword}) {
@@ -129,6 +224,8 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
   }
 
   return (
+    <>
+    <h1>Sign Up Page</h1><br /><br />
     <form onSubmit={formSubmit} method="get">
       <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
       <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
@@ -136,10 +233,11 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
       <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
       <input type='submit' value="Sign Up" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
     </form>
+    </>
   );
 }
 
-function Login({firstName, lastName, username, password, setFirstName, setLastName, setUsername, setPassword}) {
+function Login({firstName, lastName, username, password, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
 
   const navigate = useNavigate();
 
@@ -155,16 +253,28 @@ function Login({firstName, lastName, username, password, setFirstName, setLastNa
       
       console.log(result);
 
-      if(result.includes("Incorrect Username and Password")) {
+      if(result.includes("Admin")) {
+        setUserTrue(true);
+        setPassTrue(true);
+        const names = result.split(" ");
+        setTitle(true);
+        setFirstName(names[2]);
+        setLastName(names[3]);
+        navigate(`/home?title=${title}`);
+      } else if(result.includes("Incorrect Username and Password")) {
         setUserTrue(false);
         setPassTrue(false);
+        setTitle(false);
       } else if(result.includes("Incorrect Username")) {
         setUserTrue(false);
+        setTitle(false);
       } else if(result.includes("Incorrect Password")) {
         setPassTrue(false);
+        setTitle(false);
       } else if(result.includes("Correct Username and Password")) {
         setUserTrue(true);
         setPassTrue(true);
+        setTitle(false);
         const names = result.split(" ");
         setFirstName(names[4]);
         setLastName(names[5]);
@@ -201,15 +311,16 @@ function AppWrapper() {
   const [lname, setLastName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [title, setTitle] = useState(true);
 
   return (
 
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Login firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword}/>}></Route>
+      <Route path="/" element={<Login firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword}/>}></Route>
-      <Route path="/home" element={<Home firstName={fname} lastName={lname} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword}/>}></Route>
-      <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setPassword={setPassword}/>}></Route>
+      <Route path="/home" element={<Home firstName={fname} lastName={lname} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
+      <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setPassword={setPassword}/>}></Route>
     </Routes>
   </BrowserRouter>
   );
