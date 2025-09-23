@@ -157,11 +157,26 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
         </nav>
         <div>
           <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
-          <div>{users.map((user, index) => {
-            return (
-              <p key={index}>First Name: {user.firstname} Last Name: {user.lastname} User Name: {user.username}</p>
-            )
-          })}</div>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>User Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user, index) => {
+                return (
+                  <tr key={index}>
+                    <td key={index}>{user.firstname}</td>
+                    <td key={index}>{user.lastname}</td>
+                    <td key={index}>{user.username}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
           <form>
             <label for="userDelete"> Delete User:
               <select name="delete">
