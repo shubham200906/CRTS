@@ -99,7 +99,8 @@ function Update({firstName, lastName, username, password, title, setFirstName, s
 function Home({firstName, lastName, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
 
   const navigate = useNavigate();
-  const [users, setUsers] = useState("");
+  const [users, setUsers] = useState([]);
+  const [userDelete, setUserDelete] = useState("");
 
   function handleSignOut() {
     setFirstName("");
@@ -110,17 +111,25 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
     navigate("/");
   }
 
+  /*function handleUserDelete(event) {
+    setUserDelete(event.target.value);
+  }
+
+  function formSubmit() {
+    fetch(`http://localhost:3000/home?userDelete=${userDelete}`)
+    .then(response => response.text())
+    .then(result => {
+      console.log(result);
+    })
+  }*/
+
   useEffect(() => {
       if(title) {
       fetch(`http://localhost:3000/home?title=${title}`)
       .then(response => response.json())
       .then(result => {
         console.log(result);
-        let display = "";
-        for(let i = 0; i < result.length; i++) {
-          display += "First Name: " + result[i].firstname + " Last Name: " + result[i].lastname + " User Name: " + result[i].username + "\n";
-        }
-        setUsers(display);
+        setUsers(result);
       })
     }
   }, [title])
@@ -148,7 +157,21 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
         </nav>
         <div>
           <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
-          <pre>{users}</pre>
+          <div>{users.map((user, index) => {
+            return (
+              <p key={index}>First Name: {user.firstname} Last Name: {user.lastname} User Name: {user.username}</p>
+            )
+          })}</div>
+          <form>
+            <label for="userDelete"> Delete User:
+              <select name="delete">
+                {users.map((user, index) => {
+                  return <option key={index} value={(user.username)}>{user.username}</option>;
+                })}
+              </select>
+            </label><br /><br />
+            <input type="submit" value="Delete" /><br /><br />
+          </form>
           <h3><a href="/" onClick={handleSignOut}>Sign Out</a></h3>
         </div>
       </>
@@ -177,10 +200,11 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
   }
 }
 
-function SignUp({firstName, lastName, username, password, setFirstName, setLastName, setUsername, setPassword}) {
+function SignUp({firstName, lastName, username, password, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
   const navigate = useNavigate();
 
   const [userTrue, setUserTrue] = useState(true);
+  const [passTrue, setPassTrue] = useState(true);
 
   function formSubmit(event) {
     event.preventDefault();
@@ -191,17 +215,26 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
       
       console.log(result);
 
-      if(result.includes("Username already exists")) {
-        setUserTrue(false);
+      if(result.includes("too short")) {
+        setPassTrue(false);
+        setTitle(false);
       } else {
-        setUserTrue(true);
+        if(result.includes("Username already exists")) {
+          setUserTrue(false);
+          setPassTrue(true);
+          setTitle(false);
+        } else {
+          setUserTrue(true);
 
-        const names = result.split(" ");
-        setFirstName(names[0]);
-        setLastName(names[1]);
-        setUsername(names[2]);
-        setPassword(names[3]);
-        navigate("/home");
+          const names = result.split(" ");
+          setFirstName(names[0]);
+          setLastName(names[1]);
+          setUsername(names[2]);
+          setPassword(names[3]);
+          setTitle(false);
+          setPassTrue(true);
+          navigate("/home");
+        }
       }
 
     });
@@ -230,14 +263,14 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
       <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
       <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
       <label className={`fs-4`}>Email: <input type='email' value={username} onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br /><br />
-      <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
+      <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom ${passTrue ? "bg-white" : "bg-danger"}`} name="password"/></label><br /><br />
       <input type='submit' value="Sign Up" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
     </form>
     </>
   );
 }
 
-function Login({firstName, lastName, username, password, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
+function Login({username, password, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
 
   const navigate = useNavigate();
 
@@ -298,7 +331,7 @@ function Login({firstName, lastName, username, password, title, setFirstName, se
       <h1>Login Page</h1><br /><br /><br />
       <form onSubmit={formSubmit} method="get">
         <label className={`fs-4`}>Email: <input type='email' value={username} onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br /><br />
-        <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom ${passTrue ? "bg-white" : "bg-danger"}`} name="password" min-length='5'/></label><br /><br />
+        <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom ${passTrue ? "bg-white" : "bg-danger"}`} name="password"/></label><br /><br />
         <input type='submit' value="Log In" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
       </form><br />
       <h5>Don't have an account? Click <a href="/signup">here</a> to sign up.</h5>
@@ -317,8 +350,8 @@ function AppWrapper() {
 
   <BrowserRouter>
     <Routes>
-      <Route path="/" element={<Login firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
-      <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword}/>}></Route>
+      <Route path="/" element={<Login username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
+      <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/home" element={<Home firstName={fname} lastName={lname} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setPassword={setPassword}/>}></Route>
     </Routes>

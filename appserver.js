@@ -53,25 +53,30 @@ app.get("/", (req, res) => {
   console.log("Password: " + req.query.password);
 
   user.findOne({username:req.query.username}).then((users) => {
+
+    console.log("Username: " + users.username);
+    console.log("Password: " + users.password);
+    console.log(users.password == "password");
+
     if(users) {
-      if(users.username == "shubhadmin@gmail.com" && users.password == "password") {
-      console.log("Admin User");
-      res.send("Admin User: " + users.firstname + " " + users.lastname);
+      if(req.query.username == "shubhadmin@gmail.com" && req.query.password == "password") {
+        console.log("Admin User");
+        return res.send("Admin User: " + users.firstname + " " + users.lastname);
       } else if(req.query.password == users.password) {
         console.log("Correct Username and Password " + users.firstname + " " + users.lastname);
-        res.send("Correct Username and Password " + users.firstname + " " + users.lastname);
+        return res.send("Correct Username and Password " + users.firstname + " " + users.lastname);
       } else {
         console.log("Incorrect Password");
-        res.send("Incorrect Password");
+        return res.send("Incorrect Password");
       }
     } else {
       user.findOne({password:req.query.password}).then((userPass) => {
         if(userPass) {
           console.log("Incorrect Username");
-          res.send("Incorrect Username");
+          return res.send("Incorrect Username");
         } else {
           console.log("Incorrect Username and Password");
-          res.send("Incorrect Username and Password");
+          return res.send("Incorrect Username and Password");
         }
       })
     }
@@ -87,9 +92,12 @@ app.get("/signup", (req, res) => {
   console.log("Username: " + req.query.username + " ");
   console.log("Password: " + req.query.password);
 
-  user.findOne({username:req.query.username}).then((users) => {
+  if(req.query.password.length < 5) {
+    return res.send("Password is too short");
+  } else {
+    user.findOne({username:req.query.username}).then((users) => {
     if(users) {
-      res.send("Username already exists. Please create a different username.");
+      return res.send("Username already exists. Please create a different username.");
     } else {
       const user1 = new user({
         firstname : req.query.firstname,
@@ -99,9 +107,10 @@ app.get("/signup", (req, res) => {
       });
       user1.save();
       console.log("New User Created");
-      res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+      return res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
     }
   });
+  }
 });
 
 app.get("/update", (req, res) => {
