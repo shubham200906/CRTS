@@ -140,9 +140,20 @@ app.get("/update", (req, res) => {
 
 app.get("/home", (req, res) => {
   if(req.query.title) {
-    user.find({}).then((users) => {
-      res.json(users);
-    })
+    if(req.query.userDelete) {
+      user.findOneAndDelete({username:req.query.userDelete}).then((user) => {
+      if(user) {
+        console.log("Deleted User");
+      }
+     })
+     user.find({}).then((users) => {
+        res.json(users);
+     })
+    } else {
+      user.find({}).then((users) => {
+        res.json(users);
+      })
+    }
   }
 });
 

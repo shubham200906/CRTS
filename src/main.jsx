@@ -111,17 +111,25 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
     navigate("/");
   }
 
-  /*function handleUserDelete(event) {
+  function handleUserDelete(event) {
     setUserDelete(event.target.value);
   }
 
-  function formSubmit() {
-    fetch(`http://localhost:3000/home?userDelete=${userDelete}`)
-    .then(response => response.text())
+  function formSubmit(event) {
+    event.preventDefault();
+
+    let url = `http://localhost:3000/home?title=${title}`
+    if(userDelete) {
+      url += `&userDelete=${userDelete}`
+    }
+
+    fetch(url)
+    .then(response => response.json())
     .then(result => {
       console.log(result);
+      setUsers(result);
     })
-  }*/
+  }
 
   useEffect(() => {
       if(title) {
@@ -147,7 +155,6 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
                 <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
               </li>
             </ul>
-
             <ul className={`navbar-nav ms-auto`}>
               <li className={`nav-item`}>
                 <h5 className={`nav-link mb-0 h5`}>Admin: {firstName} {lastName}</h5>
@@ -169,17 +176,17 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
               {users.map((user, index) => {
                 return (
                   <tr key={index}>
-                    <td key={index}>{user.firstname}</td>
-                    <td key={index}>{user.lastname}</td>
-                    <td key={index}>{user.username}</td>
+                    <td>{user.firstname}</td>
+                    <td>{user.lastname}</td>
+                    <td>{user.username}</td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
-          <form>
+          <form onSubmit={formSubmit} method="get">
             <label for="userDelete"> Delete User:
-              <select name="delete">
+              <select name="delete" onChange={handleUserDelete}>
                 {users.map((user, index) => {
                   return <option key={index} value={(user.username)}>{user.username}</option>;
                 })}
