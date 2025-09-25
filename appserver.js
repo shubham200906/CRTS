@@ -17,13 +17,6 @@ app.use(cors({
   origin : "http://localhost:5173"
 }));
 
-const info = {
-    firstname : ["Shubham", "username"],
-    lastname : ["Gupta", "password"],
-    username : ["Shubham", "username"],
-    password : ["Gupta", "password"]
-};
-
 const userSchema = new mongoose.Schema({
   firstname : {
     type : String,
@@ -41,6 +34,10 @@ const userSchema = new mongoose.Schema({
     type : String,
     require : true
   },
+  title : {
+    type : Boolean,
+    require : false
+  }
 });
 
 const user = mongoose.model("User", userSchema);
@@ -49,17 +46,15 @@ app.get("/", (req, res) => {
 
   console.log("login");
 
-  console.log("Username: " + req.query.username + " ");
-  console.log("Password: " + req.query.password);
-
   user.findOne({username:req.query.username}).then((users) => {
 
     console.log("Username: " + users.username);
     console.log("Password: " + users.password);
+    console.log("Title: " + users.title);
     console.log(users.password == "password");
 
     if(users) {
-      if(req.query.username == "shubhadmin@gmail.com" && req.query.password == "password") {
+      if(req.query.title) {
         console.log("Admin User");
         return res.send("Admin User: " + users.firstname + " " + users.lastname);
       } else if(req.query.password == users.password) {
@@ -90,7 +85,8 @@ app.get("/signup", (req, res) => {
   console.log("Firstname: " + req.query.firstname + " ");
   console.log("Lastname: " + req.query.lastname + " ");
   console.log("Username: " + req.query.username + " ");
-  console.log("Password: " + req.query.password);
+  console.log("Password: " + req.query.password + " ");
+  console.log("Title: " + req.query.title)
 
   if(req.query.password.length < 5) {
     return res.send("Password is too short");
@@ -103,7 +99,8 @@ app.get("/signup", (req, res) => {
         firstname : req.query.firstname,
         lastname : req.query.lastname,
         username : req.query.username,
-        password : req.query.password
+        password : req.query.password,
+        title : req.query.title
       });
       user1.save();
       console.log("New User Created");

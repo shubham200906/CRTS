@@ -60,10 +60,10 @@ function Update({firstName, lastName, username, password, title, setFirstName, s
         </nav>
       <h1>Update User Profile:</h1><br /><br />
       <form onSubmit={formSubmit} method="get">
-        <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
-        <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
+        <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname" value={firstName}/></label><br /><br />
+        <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname" value={lastName}/></label><br /><br />
         <input type="hidden" value={username} />
-        <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
+        <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" value={password}/></label><br /><br />
         <input type='submit' value="Update" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
       </form>
     </>
@@ -100,7 +100,6 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
 
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
-  const [userDelete, setUserDelete] = useState("");
 
   function handleSignOut() {
     setFirstName("");
@@ -111,16 +110,20 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
     navigate("/");
   }
 
-  function handleUserDelete(event) {
-    setUserDelete(event.target.value);
+  function handleUpdate() {
+    navigate("/update");
   }
 
-  function formSubmit(event) {
+  function deleteUser(event) {
+    handleUserDelete(event, event.target.value);
+  }
+
+  function handleUserDelete(event, username) {
     event.preventDefault();
 
     let url = `http://localhost:3000/home?title=${title}`
-    if(userDelete) {
-      url += `&userDelete=${userDelete}`
+    if(username) {
+      url += `&userDelete=${username}`
     }
 
     fetch(url)
@@ -170,6 +173,7 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
                 <th>First Name</th>
                 <th>Last Name</th>
                 <th>User Name</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -179,21 +183,20 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
                     <td>{user.firstname}</td>
                     <td>{user.lastname}</td>
                     <td>{user.username}</td>
+                    <td>
+                    <button className={`btn btn-secondary dropdown-toggle`} type="button" data-bs-toggle="dropdown">
+                      Action
+                    </button>
+                    <ul className={`dropdown-menu`}>
+                      <li><button type="button" className={`dropdown-item`} onClick={handleUpdate}>Update {user.username}</button ></li>
+                      <li><button type="button" className={`dropdown-item`} value={user.username} onClick={deleteUser}>Delete {user.username}</button></li>
+                    </ul>
+                    </td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
-          <form onSubmit={formSubmit} method="get">
-            <label for="userDelete"> Delete User:
-              <select name="delete" onChange={handleUserDelete}>
-                {users.map((user, index) => {
-                  return <option key={index} value={(user.username)}>{user.username}</option>;
-                })}
-              </select>
-            </label><br /><br />
-            <input type="submit" value="Delete" /><br /><br />
-          </form>
           <h3><a href="/" onClick={handleSignOut}>Sign Out</a></h3>
         </div>
       </>
@@ -222,7 +225,7 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
   }
 }
 
-function SignUp({firstName, lastName, username, password, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
+function SignUp({firstName, lastName, username, password, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
   const navigate = useNavigate();
 
   const [userTrue, setUserTrue] = useState(true);
@@ -231,7 +234,7 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
   function formSubmit(event) {
     event.preventDefault();
 
-    fetch(`http://localhost:3000/signup?firstname=${firstName}&lastname=${lastName}&username=${username}&password=${password}`)
+    fetch(`http://localhost:3000/signup?firstname=${firstName}&lastname=${lastName}&username=${username}&password=${password}&title=${title}`)
     .then(response => response.text())
     .then(result => {
       
@@ -253,8 +256,12 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
           setLastName(names[1]);
           setUsername(names[2]);
           setPassword(names[3]);
-          setTitle(false);
           setPassTrue(true);
+          if(title) {
+            setTitle(true);
+          } else {
+            setTitle(false);
+          }
           navigate("/home");
         }
       }
@@ -278,6 +285,10 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
     setLastName(event.target.value);
   }
 
+  function handleAdmin(event) {
+    setTitle(event.target.checked);
+  }
+
   return (
     <>
     <h1>Sign Up Page</h1><br /><br />
@@ -286,6 +297,7 @@ function SignUp({firstName, lastName, username, password, setFirstName, setLastN
       <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
       <label className={`fs-4`}>Email: <input type='email' value={username} onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br /><br />
       <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom ${passTrue ? "bg-white" : "bg-danger"}`} name="password"/></label><br /><br />
+      <label className={`fs-4`}><input type="checkbox" name="checkAdmin" onClick={handleAdmin} /> Admin?</label><br /><br />
       <input type='submit' value="Sign Up" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
     </form>
     </>
@@ -302,7 +314,7 @@ function Login({username, password, title, setFirstName, setLastName, setUsernam
   function formSubmit(event) {
     event.preventDefault();
 
-    fetch(`http://localhost:3000/?username=${username}&password=${password}`)
+    fetch(`http://localhost:3000/?username=${username}&password=${password}&title=${title}`)
     .then(response => response.text())
     .then(result => {
       
@@ -373,7 +385,7 @@ function AppWrapper() {
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
-      <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
+      <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/home" element={<Home firstName={fname} lastName={lname} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setPassword={setPassword}/>}></Route>
     </Routes>
