@@ -54,7 +54,7 @@ app.get("/", (req, res) => {
     console.log(users.password == "password");
 
     if(users) {
-      if(users.title === "true") {
+      if(users.title) {
         console.log("Admin User");
         return res.send("Admin User: " + users.firstname + " " + users.lastname);
       } else if(req.query.password == users.password) {
@@ -116,12 +116,13 @@ app.get("/signup", (req, res) => {
 });
 
 app.get("/update", (req, res) => {
-  console.log("Firstname: " + req.query.firstname + " ");
-  console.log("Lastname: " + req.query.lastname + " ");
-  console.log("Username: " + req.query.username + " ");
-  console.log("Password: " + req.query.password);
-
-  user.findOne({username:req.query.username}).then((users) => {
+  if(req.query.searchUser) {
+    console.log("Search User: " + req.query.searchUser);
+    user.findOne({username:req.query.searchUser}).then((users) => {
+      res.send(users.firstname + " " + users.lastname + " " + users.password);
+    })
+  } else {
+    user.findOne({username:req.query.username}).then((users) => {
     if(users) {
       users.firstname = req.query.firstname;
       users.lastname = req.query.lastname;
@@ -137,7 +138,7 @@ app.get("/update", (req, res) => {
       res.send("User not found");
     }
   });
-
+  }
 });
 
 app.get("/home", (req, res) => {

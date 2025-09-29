@@ -2,39 +2,56 @@ import { StrictMode, useState, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { BrowserRouter, Routes, Route, useNavigate, Link } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useNavigate, useSearchParams, Link } from 'react-router-dom'
 
 
-function Update({firstName, lastName, username, password, title, setFirstName, setLastName, setPassword}) {
+function Update({firstName, lastName, username, title}) {
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const uname = searchParams.get("username");
+  const [fname, setFName] = useState("");
+  const [lname, setLName] = useState("");
+  const [passName, setPassName] = useState("");
+
+  useEffect(() => {
+    fetch(`http://localhost:3000/update?searchUser=${uname}`)
+    .then(response => response.text())
+    .then(result => {
+      const names = result.split(" ");
+      setFName(names[0]);
+      setLName(names[1]);
+      setPassName(names[2]);
+    })
+  }, [uname])
 
   function formSubmit(event) {
     event.preventDefault();
 
-    fetch(`http://localhost:3000/update?firstname=${firstName}&lastname=${lastName}&username=${username}&password=${password}`)
+    fetch(`http://localhost:3000/update?firstname=${fname}&lastname=${lname}&username=${uname}&password=${passName}`)
     .then(response => response.text())
     .then(result => {
       if(!result.includes("User not found")) {
         const names = result.split(" ");
-        setFirstName(names[0]);
-        setLastName(names[1]);
-        setPassword(names[2]);
+        setFName(names[0]);
+        setLName(names[1]);
+        setPassName(names[2]);
         navigate("/home");
       }
     })
   }
 
   function handlePassword(event) {
-    setPassword(event.target.value);
+    setPassName(event.target.value);
   }
 
   function handleFirstName(event) {
-    setFirstName(event.target.value);
+    setFName(event.target.value);
   }
 
   function handleLastName(event) {
-    setLastName(event.target.value);
+    setLName(event.target.value);    
   }
 
   if(title) {
@@ -47,7 +64,7 @@ function Update({firstName, lastName, username, password, title, setFirstName, s
                 <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
               </li>
               <li className={`nav-item`}>
-                <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
+                <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
               </li>
             </ul>
 
@@ -60,10 +77,10 @@ function Update({firstName, lastName, username, password, title, setFirstName, s
         </nav>
       <h1>Update User Profile:</h1><br /><br />
       <form onSubmit={formSubmit} method="get">
-        <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname" value={firstName}/></label><br /><br />
-        <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname" value={lastName}/></label><br /><br />
+        <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname" value={fname}/></label><br /><br />
+        <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname" value={lname}/></label><br /><br />
         <input type="hidden" value={username} />
-        <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" value={password}/></label><br /><br />
+        <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" value={passName}/></label><br /><br />
         <input type='submit' value="Update" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
       </form>
     </>
@@ -78,17 +95,17 @@ function Update({firstName, lastName, username, password, title, setFirstName, s
                 <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
               </li>
               <li className={`nav-item`}>
-                <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
+                <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
               </li>
             </ul>
           </div>
         </nav>
       <h1>Update User Profile:</h1><br /><br />
       <form onSubmit={formSubmit} method="get">
-        <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
-        <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
+        <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname" value={fname}/></label><br /><br />
+        <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname" value={lname}/></label><br /><br />
         <input type="hidden" value={username} />
-        <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5'/></label><br /><br />
+        <label className={`fs-4`}>Password: <input type='password' onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom`} name="password" min-length='5' value={passName}/></label><br /><br />
         <input type='submit' value="Update" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
       </form>
       </>
@@ -112,9 +129,10 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
     navigate("/");
   }
 
-  function handleUpdate() {
+  function handleUpdate(event) {
     showPopup(false);
-    navigate("/update");
+    console.log(event.target.value);
+    navigate(`/update?username=${event.target.value}`);
   }
 
   function deleteUser(event) {
@@ -157,7 +175,7 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
                 <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
               </li>
               <li className={`nav-item`}>
-                <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
+                <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
               </li>
             </ul>
             <ul className={`navbar-nav ms-auto`}>
@@ -213,7 +231,7 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
                         Action
                       </button>
                       <ul className={`dropdown-menu`}>
-                        <li><button type="button" className={`dropdown-item`} onClick={handleUpdate}>Update {user.username}</button ></li>
+                        <li><button type="button" className={`dropdown-item`} value={user.username} onClick={handleUpdate}>Update {user.username}</button ></li>
                         <li><button type="button" className={`dropdown-item`} value={user.username} onClick={deleteUser}>Delete {user.username}</button></li>
                       </ul>
                       </td>
@@ -253,7 +271,7 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
                 <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
               </li>
               <li className={`nav-item`}>
-                <Link to="/update" className={`nav-link mb-0 h5`}>Update User</Link>
+                <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
               </li>
             </ul>
           </div>
@@ -432,7 +450,7 @@ function AppWrapper() {
       <Route path="/" element={<Login username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/home" element={<Home firstName={fname} lastName={lname} username={username} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
-      <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setPassword={setPassword}/>}></Route>
+      <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} title={title}/>}></Route>
     </Routes>
   </BrowserRouter>
   );
