@@ -5,7 +5,7 @@ import App from './App.jsx'
 import { BrowserRouter, Routes, Route, useNavigate, useSearchParams, Link } from 'react-router-dom'
 
 
-function Update({firstName, lastName, username, title}) {
+function Update({firstName, lastName, username, title, setFirstName, setLastName}) {
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -37,6 +37,8 @@ function Update({firstName, lastName, username, title}) {
         setFName(names[0]);
         setLName(names[1]);
         setPassName(names[2]);
+        setFirstName(names[0]);
+        setLastName(names[1]);
         navigate("/home");
       }
     })
@@ -450,7 +452,7 @@ function AppWrapper() {
       <Route path="/" element={<Login username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/home" element={<Home firstName={fname} lastName={lname} username={username} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
-      <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} title={title}/>}></Route>
+      <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} title={title} setFirstName={setFirstName} setLastName={setLastName}/>}></Route>
     </Routes>
   </BrowserRouter>
   );
