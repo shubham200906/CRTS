@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema({
   },
   title : {
     type : Boolean,
-    require : false
+    require : true
   }
 });
 
@@ -54,7 +54,7 @@ app.get("/", (req, res) => {
     console.log(users.password == "password");
 
     if(users) {
-      if(req.query.title) {
+      if(users.title === "true") {
         console.log("Admin User");
         return res.send("Admin User: " + users.firstname + " " + users.lastname);
       } else if(req.query.password == users.password) {
@@ -104,7 +104,12 @@ app.get("/signup", (req, res) => {
       });
       user1.save();
       console.log("New User Created");
-      return res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+      if(req.query.title === "true") {
+        console.log("New Admin User");
+        return res.send("Admin " + req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+      } else {
+        return res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+      }
     }
   });
   }

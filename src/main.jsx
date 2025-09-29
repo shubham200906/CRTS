@@ -96,10 +96,12 @@ function Update({firstName, lastName, username, password, title, setFirstName, s
   }
 }
 
-function Home({firstName, lastName, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
+function Home({firstName, lastName, username, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
 
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
+  const [popup, showPopup] = useState(false);
+  const [delUser, setDelUser] = useState("");
 
   function handleSignOut() {
     setFirstName("");
@@ -111,26 +113,26 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
   }
 
   function handleUpdate() {
+    showPopup(false);
     navigate("/update");
   }
 
   function deleteUser(event) {
-    handleUserDelete(event, event.target.value);
+    setDelUser(event.target.value);
+    showPopup(true);
   }
 
-  function handleUserDelete(event, username) {
+  function handleUserDelete(event) {
     event.preventDefault();
 
-    let url = `http://localhost:3000/home?title=${title}`
-    if(username) {
-      url += `&userDelete=${username}`
-    }
+    let url = `http://localhost:3000/home?title=${title}&userDelete=${delUser}`
 
     fetch(url)
     .then(response => response.json())
     .then(result => {
-      console.log(result);
+      console.log(result);  
       setUsers(result);
+      showPopup(false);
     })
   }
 
@@ -167,7 +169,29 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
         </nav>
         <div>
           <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
-          <table class="table table-hover">
+          {popup && (
+          <>
+            <div className={`modal show d-block`} tabIndex="-1" role="dialog">
+              <div className={`modal-dialog`}>
+                <div className={'modal-content'}>
+                  <div className={`modal-header`}>
+                    <h5 className={`modal-tilte`}>Delete</h5>
+                    <button type="button" className={`btn-close`} onClick={() => showPopup(false)}>
+                    </button>
+                  </div>
+                  <div className={`modal-body`}>
+                    <p>Delete {delUser}?</p>
+                  </div>
+                  <div className={`modal-footer`}>
+                    <button type="button" className={'btn btn-primary'} onClick={handleUserDelete}>Delete</button>
+                    <button type="button" className={'btn btn-secondary'} onClick={() => showPopup(false)}>Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+           <div className={`modal-backdrop fade show`}></div>
+          </>)}
+          <table className={`table table-hover`}>
             <thead>
               <tr>
                 <th>First Name</th>
@@ -178,22 +202,40 @@ function Home({firstName, lastName, title, setFirstName, setLastName, setUsernam
             </thead>
             <tbody>
               {users.map((user, index) => {
-                return (
-                  <tr key={index}>
-                    <td>{user.firstname}</td>
-                    <td>{user.lastname}</td>
-                    <td>{user.username}</td>
-                    <td>
-                    <button className={`btn btn-secondary dropdown-toggle`} type="button" data-bs-toggle="dropdown">
-                      Action
-                    </button>
-                    <ul className={`dropdown-menu`}>
-                      <li><button type="button" className={`dropdown-item`} onClick={handleUpdate}>Update {user.username}</button ></li>
-                      <li><button type="button" className={`dropdown-item`} value={user.username} onClick={deleteUser}>Delete {user.username}</button></li>
-                    </ul>
-                    </td>
-                  </tr>
-                )
+                if(!(user.username == username)) {
+                  return (
+                    <tr key={index}>
+                      <td>{user.firstname}</td>
+                      <td>{user.lastname}</td>
+                      <td>{user.username}</td>
+                      <td>
+                      <button className={`btn btn-secondary dropdown-toggle`} type="button" data-bs-toggle="dropdown">
+                        Action
+                      </button>
+                      <ul className={`dropdown-menu`}>
+                        <li><button type="button" className={`dropdown-item`} onClick={handleUpdate}>Update {user.username}</button ></li>
+                        <li><button type="button" className={`dropdown-item`} value={user.username} onClick={deleteUser}>Delete {user.username}</button></li>
+                      </ul>
+                      </td>
+                    </tr>
+                  )
+                } else {
+                  return (
+                    <tr key={index}>
+                      <td>{user.firstname}</td>
+                      <td>{user.lastname}</td>
+                      <td>{user.username}</td>
+                      <td>
+                      <button className={`btn btn-secondary dropdown-toggle`} type="button" data-bs-toggle="dropdown">
+                        Action
+                      </button>
+                      <ul className={`dropdown-menu`}>
+                        <li><button type="button" className={`dropdown-item`} onClick={handleUpdate}>Update {user.username}</button ></li>
+                      </ul>
+                      </td>
+                    </tr>
+                  )
+                }
               })}
             </tbody>
           </table>
@@ -249,19 +291,22 @@ function SignUp({firstName, lastName, username, password, title, setFirstName, s
           setPassTrue(true);
           setTitle(false);
         } else {
-          setUserTrue(true);
-
           const names = result.split(" ");
-          setFirstName(names[0]);
-          setLastName(names[1]);
-          setUsername(names[2]);
-          setPassword(names[3]);
-          setPassTrue(true);
-          if(title) {
+          if(result.includes("Admin")) {
             setTitle(true);
+            setFirstName(names[1]);
+            setLastName(names[2]);
+            setUsername(names[3]);
+            setPassword(names[4]);
           } else {
             setTitle(false);
+            setFirstName(names[0]);
+            setLastName(names[1]);
+            setUsername(names[2]);
+            setPassword(names[3]);
           }
+          setUserTrue(true);
+          setPassTrue(true);
           navigate("/home");
         }
       }
@@ -321,10 +366,10 @@ function Login({username, password, title, setFirstName, setLastName, setUsernam
       console.log(result);
 
       if(result.includes("Admin")) {
+        setTitle(true);
         setUserTrue(true);
         setPassTrue(true);
         const names = result.split(" ");
-        setTitle(true);
         setFirstName(names[2]);
         setLastName(names[3]);
         navigate(`/home?title=${title}`);
@@ -378,7 +423,7 @@ function AppWrapper() {
   const [lname, setLastName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [title, setTitle] = useState(true);
+  const [title, setTitle] = useState(false);
 
   return (
 
@@ -386,7 +431,7 @@ function AppWrapper() {
     <Routes>
       <Route path="/" element={<Login username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
-      <Route path="/home" element={<Home firstName={fname} lastName={lname} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
+      <Route path="/home" element={<Home firstName={fname} lastName={lname} username={username} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setPassword={setPassword}/>}></Route>
     </Routes>
   </BrowserRouter>
