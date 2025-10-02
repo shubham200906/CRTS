@@ -59,24 +59,48 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
   if(title) {
     return (
       <>
-        <nav className={`navbar navbar-expand-sm navbar-light bg-light fixed-top`}>
-          <div className={`container-fluid collapse navbar-collapse`}>
-            <ul className={`navbar-nav`}>
-              <li className={`nav-item`}>
-                <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
-              </li>
-              <li className={`nav-item`}>
-                <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-              </li>
-            </ul>
-
-            <ul className={`navbar-nav ms-auto`}>
-              <li className={`nav-item`}>
-                <h5 className={`nav-link mb-0 h5`}>Admin: {firstName} {lastName}</h5>
-              </li>
-            </ul>
+        <nav className="navbar bg-body-tertiary fixed-top">
+        <div className="container-fluid">
+          <div className={`d-flex w-100 justify-content-end`}>
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNavbar"
+              aria-controls="offcanvasNavbar"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
           </div>
-        </nav>
+            
+          <div
+            className="offcanvas offcanvas-end"
+            tabIndex="-1"
+            id="offcanvasNavbar"
+            aria-labelledby="offcanvasNavbarLabel"
+          >
+            <div className="offcanvas-header">
+              <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="offcanvas-body">
+              <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
+                <li className="nav-item">
+                  <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
       <h1>Update User Profile:</h1><br /><br />
       <form onSubmit={formSubmit} method="get">
         <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname" value={fname}/></label><br /><br />
@@ -90,18 +114,48 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
   } else {
     return (
       <>
-        <nav className={`navbar navbar-expand-sm navbar-light bg-light fixed-top`}>
-          <div className={`collapse navbar-collapse`}>
-            <ul className={`navbar-nav`}>
-              <li className={`nav-item`}>
-                <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
-              </li>
-              <li className={`nav-item`}>
-                <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-              </li>
-            </ul>
+        <nav className="navbar bg-body-tertiary fixed-top">
+        <div className="container-fluid">
+          <div className={`d-flex w-100 justify-content-end`}>
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNavbar"
+              aria-controls="offcanvasNavbar"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
           </div>
-        </nav>
+            
+          <div
+            className="offcanvas offcanvas-end"
+            tabIndex="-1"
+            id="offcanvasNavbar"
+            aria-labelledby="offcanvasNavbarLabel"
+          >
+            <div className="offcanvas-header">
+              <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="offcanvas-body">
+              <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
+                <li className="nav-item">
+                  <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
       <h1>Update User Profile:</h1><br /><br />
       <form onSubmit={formSubmit} method="get">
         <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname" value={fname}/></label><br /><br />
@@ -170,23 +224,52 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
   if(title) {
     return (
       <>
-        <nav className={`navbar navbar-expand-sm navbar-light bg-light fixed-top`}>
-          <div className={`container-fluid collapse navbar-collapse`}>
-            <ul className={`navbar-nav`}>
-              <li className={`nav-item`}>
-                <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
-              </li>
-              <li className={`nav-item`}>
-                <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-              </li>
-            </ul>
-            <ul className={`navbar-nav ms-auto`}>
-              <li className={`nav-item`}>
-                <h5 className={`nav-link mb-0 h5`}>Admin: {firstName} {lastName}</h5>
-              </li>
-            </ul>
+        <nav className="navbar bg-body-tertiary fixed-top">
+        <div className="container-fluid">
+          <div className={`d-flex w-100 justify-content-end`}>
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNavbar"
+              aria-controls="offcanvasNavbar"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
           </div>
-        </nav>
+            
+          <div
+            className="offcanvas offcanvas-end"
+            tabIndex="-1"
+            id="offcanvasNavbar"
+            aria-labelledby="offcanvasNavbarLabel"
+          >
+            <div className="offcanvas-header">
+              <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="offcanvas-body">
+              <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
+                <li className="nav-item">
+                  <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
+
         <div>
           <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
           {popup && (
@@ -203,7 +286,7 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
                     <p>Delete {delUser}?</p>
                   </div>
                   <div className={`modal-footer`}>
-                    <button type="button" className={'btn btn-primary'} onClick={handleUserDelete}>Delete</button>
+                    <button type="button" className={'btn btn-danger'} onClick={handleUserDelete}>Delete</button>
                     <button type="button" className={'btn btn-secondary'} onClick={() => showPopup(false)}>Close</button>
                   </div>
                 </div>
@@ -259,28 +342,59 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
               })}
             </tbody>
           </table>
-          <h3><a href="/" onClick={handleSignOut}>Sign Out</a></h3>
         </div>
       </>
     )
   } else {
     return (
       <>
-        <nav className={`navbar navbar-expand-sm navbar-light bg-light fixed-top`}>
-          <div className={`collapse navbar-collapse`}>
-            <ul className={`navbar-nav`}>
-              <li className={`nav-item`}>
-                <Link to="/" className={`nav-link mb-0 h5`}>Home</Link>
-              </li>
-              <li className={`nav-item`}>
-                <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-              </li>
-            </ul>
+        <nav className="navbar bg-body-tertiary fixed-top">
+        <div className="container-fluid">
+          <div className={`d-flex w-100 justify-content-end`}>
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNavbar"
+              aria-controls="offcanvasNavbar"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
           </div>
-        </nav>
+            
+          <div
+            className="offcanvas offcanvas-end"
+            tabIndex="-1"
+            id="offcanvasNavbar"
+            aria-labelledby="offcanvasNavbarLabel"
+          >
+            <div className="offcanvas-header">
+              <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="offcanvas-body">
+              <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
+                <li className="nav-item">
+                  <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
         <div>
           <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
-          <h3><a href="/" onClick={handleSignOut}>Sign Out</a></h3>
         </div>
       </>
     );
