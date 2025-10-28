@@ -4,6 +4,81 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter, Routes, Route, useNavigate, useSearchParams, Link } from 'react-router-dom'
 
+function Email({firstName, lastName, username, title, emails, setEmails}) {
+
+  useEffect(() => {
+    if(title) {
+      fetch(`http://localhost:3000/email?title=${title}`)
+      .then(response => response.json())
+      .then(result => {
+        console.log(result);
+        setEmails(result.emails);
+      })
+    }
+  }, [title])
+
+  if(title) {
+    return (
+      <>
+        <nav className="navbar bg-body-tertiary fixed-top">
+        <div className="container-fluid">
+          <div className={`d-flex w-100 justify-content-end`}>
+            <button
+              className="navbar-toggler"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#offcanvasNavbar"
+              aria-controls="offcanvasNavbar"
+            >
+              <span className="navbar-toggler-icon"></span>
+            </button>
+          </div>
+            
+          <div
+            className="offcanvas offcanvas-end"
+            tabIndex="-1"
+            id="offcanvasNavbar"
+            aria-labelledby="offcanvasNavbarLabel"
+          >
+            <div className="offcanvas-header">
+              <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="offcanvas"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="offcanvas-body">
+              <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
+                <li className="nav-item">
+                  <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {emails.map((email, index) => {
+        return (
+          <div key={index}>
+            <p>Body: {email.Body}</p><br /><br />
+            <p>Subject: {email.Subject}</p>
+            <p>To: {email.To}</p>
+            <p>From: {email.From}</p>
+          </div>
+      )})}
+    </>
+    )
+  }
+}
 
 function Update({firstName, lastName, username, title, setFirstName, setLastName}) {
 
@@ -96,6 +171,9 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
                 </li>
+                <li className="nav-item">
+                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -151,6 +229,9 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
                 </li>
+                <li className="nav-item">
+                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -169,12 +250,10 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
   }
 }
 
-function Home({firstName, lastName, username, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
+function Home({firstName, lastName, username, title, emails, setFirstName, setLastName, setUsername, setPassword, setTitle, setEmails}) {
 
   const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
   const [popup, showPopup] = useState(false);
-  const [delUser, setDelUser] = useState("");
 
   function handleSignOut() {
     setFirstName("");
@@ -185,28 +264,17 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
     navigate("/");
   }
 
-  function handleUpdate(event) {
-    showPopup(false);
-    console.log(event.target.value);
-    navigate(`/update?username=${event.target.value}`);
-  }
-
-  function deleteUser(event) {
-    setDelUser(event.target.value);
+  function viewEmail(event) {
     showPopup(true);
-  }
-
-  function handleUserDelete(event) {
     event.preventDefault();
 
-    let url = `http://localhost:3000/home?title=${title}&userDelete=${delUser}`
+    let url = `http://localhost:3000/home?title=${title}`
 
     fetch(url)
     .then(response => response.json())
     .then(result => {
-      console.log(result);  
-      setUsers(result);
-      showPopup(false);
+      console.log(result.emails);  
+      setEmails(result.emails);
     })
   }
 
@@ -215,8 +283,8 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
       fetch(`http://localhost:3000/home?title=${title}`)
       .then(response => response.json())
       .then(result => {
-        console.log(result);
-        setUsers(result);
+        console.log(result.emails);
+        setEmails(result.emails);
       })
     }
   }, [title])
@@ -262,6 +330,9 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
                 </li>
                 <li className="nav-item">
+                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
+                </li>
+                <li className="nav-item">
                   <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
                 </li>
               </ul>
@@ -275,18 +346,26 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
           {popup && (
           <>
             <div className={`modal show d-block`} tabIndex="-1" role="dialog">
-              <div className={`modal-dialog`}>
+              <div className={`modal-dialog modal-dialog-scrollable modal-lg`}>
                 <div className={'modal-content'}>
                   <div className={`modal-header`}>
-                    <h5 className={`modal-tilte`}>Delete</h5>
+                    <h5 className={`modal-title`}>Email</h5>
                     <button type="button" className={`btn-close`} onClick={() => showPopup(false)}>
                     </button>
                   </div>
                   <div className={`modal-body`}>
-                    <p>Delete {delUser}?</p>
+                    {emails.map((email, index) => {
+                      return (
+                        <div key={index}>
+                          <p className={`fw-bold`}>From: </p><p>{email.From}</p><br />
+                          <p className={`fw-bold`}>To: </p><p>{email.To}</p><br />
+                          <p className={`fw-bold`}>Subject: </p><p>{email.Subject}</p><br />
+                          <p className={`fw-bold`}>Body: </p><p>{email.Body}</p><br />
+                        </div>
+                      )
+                    })}
                   </div>
                   <div className={`modal-footer`}>
-                    <button type="button" className={'btn btn-danger'} onClick={handleUserDelete}>Delete</button>
                     <button type="button" className={'btn btn-secondary'} onClick={() => showPopup(false)}>Close</button>
                   </div>
                 </div>
@@ -297,48 +376,27 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
           <table className={`table table-hover`}>
             <thead>
               <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>User Name</th>
+                <th>From</th>
+                <th>Subject</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
-              {users.map((user, index) => {
-                if(!(user.username == username)) {
+              {emails.map((email, index) => {
                   return (
                     <tr key={index}>
-                      <td>{user.firstname}</td>
-                      <td>{user.lastname}</td>
-                      <td>{user.username}</td>
+                      <td>{email.From}</td>
+                      <td>{email.Subject}</td>
                       <td>
                       <button className={`btn btn-secondary dropdown-toggle`} type="button" data-bs-toggle="dropdown">
                         Action
                       </button>
                       <ul className={`dropdown-menu`}>
-                        <li><button type="button" className={`dropdown-item`} value={user.username} onClick={handleUpdate}>Update {user.username}</button ></li>
-                        <li><button type="button" className={`dropdown-item`} value={user.username} onClick={deleteUser}>Delete {user.username}</button></li>
+                        <li><button type="button" className={`dropdown-item`} onClick={viewEmail}>View Email</button></li>
                       </ul>
                       </td>
                     </tr>
                   )
-                } else {
-                  return (
-                    <tr key={index}>
-                      <td>{user.firstname}</td>
-                      <td>{user.lastname}</td>
-                      <td>{user.username}</td>
-                      <td>
-                      <button className={`btn btn-secondary dropdown-toggle`} type="button" data-bs-toggle="dropdown">
-                        Action
-                      </button>
-                      <ul className={`dropdown-menu`}>
-                        <li><button type="button" className={`dropdown-item`} onClick={handleUpdate}>Update {user.username}</button ></li>
-                      </ul>
-                      </td>
-                    </tr>
-                  )
-                }
               })}
             </tbody>
           </table>
@@ -384,6 +442,9 @@ function Home({firstName, lastName, username, title, setFirstName, setLastName, 
                 </li>
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
                 </li>
                 <li className="nav-item">
                   <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
@@ -470,7 +531,7 @@ function SignUp({firstName, lastName, username, password, title, setFirstName, s
 
   return (
     <>
-    <h1>Sign Up Page</h1><br /><br />
+    <h1>CRTS Sign Up</h1><br /><br />
     <form onSubmit={formSubmit} method="get">
       <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
       <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
@@ -541,7 +602,7 @@ function Login({username, password, title, setFirstName, setLastName, setUsernam
 
   return (
     <>
-      <h1>Login Page</h1><br /><br /><br />
+      <h1>CRTS Login</h1><br /><br /><br />
       <form onSubmit={formSubmit} method="get">
         <label className={`fs-4`}>Email: <input type='email' value={username} onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br /><br />
         <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom ${passTrue ? "bg-white" : "bg-danger"}`} name="password"/></label><br /><br />
@@ -558,6 +619,11 @@ function AppWrapper() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [title, setTitle] = useState(false);
+  const [emails, setEmails] = useState([]);
+
+  useEffect(() => {
+      document.title = "CRTS";
+  }, []);
 
   return (
 
@@ -565,8 +631,9 @@ function AppWrapper() {
     <Routes>
       <Route path="/" element={<Login username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
-      <Route path="/home" element={<Home firstName={fname} lastName={lname} username={username} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
+      <Route path="/home" element={<Home firstName={fname} lastName={lname} username={username} title={title} emails={emails} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle} setEmails={setEmails}/>}></Route>
       <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} title={title} setFirstName={setFirstName} setLastName={setLastName}/>}></Route>
+      <Route path="/email" element={<Email firstName={fname} lastName={lname} username={username} title={title} emails={emails} setEmails={setEmails}/>}></Route>
     </Routes>
   </BrowserRouter>
   );

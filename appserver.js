@@ -40,7 +40,23 @@ const userSchema = new mongoose.Schema({
   }
 });
 
+const emailSchema = new mongoose.Schema({
+    Body : {
+      type : String
+    },
+    Subject : {
+      type : String
+    },
+    To : {
+      type : Array
+    },
+    From : {
+      type : Array
+    }
+})
+
 const user = mongoose.model("User", userSchema);
+const email = mongoose.model("Email", emailSchema);
 
 app.get("/", (req, res) => {
 
@@ -143,22 +159,21 @@ app.get("/update", (req, res) => {
 
 app.get("/home", (req, res) => {
   if(req.query.title) {
-    if(req.query.userDelete) {
-      user.findOneAndDelete({username:req.query.userDelete}).then((user) => {
-      if(user) {
-        console.log("Deleted User");
-      }
-     })
-     user.find({}).then((users) => {
-        res.json(users);
-     })
-    } else {
-      user.find({}).then((users) => {
-        res.json(users);
-      })
-    }
+    email.find({}).then((emails) => {
+      res.json({emails});
+      console.log(emails);
+    })
   }
 });
+
+app.get("/email", (req, res) => {
+  if(req.query.title) {
+    email.find({}).then((emails) => {
+      res.json({emails});
+      console.log(emails);
+    })
+  }
+})
 
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
