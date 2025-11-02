@@ -4,15 +4,15 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter, Routes, Route, useNavigate, useSearchParams, Link } from 'react-router-dom'
 
-function Email({firstName, lastName, username, title, emails, setEmails}) {
+function Email({firstName, lastName, username, title, emails, emailID, setEmails, setEmailID}) {
 
   useEffect(() => {
     if(title) {
-      fetch(`http://localhost:3000/email?title=${title}`)
+      fetch(`http://localhost:3000/email?title=${title}&id=${emailID}`)
       .then(response => response.json())
       .then(result => {
-        console.log(result);
-        setEmails(result.emails);
+        console.log(result.emails[0]);
+        setEmails(result.emails[0]);
       })
     }
   }, [title])
@@ -250,10 +250,11 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
   }
 }
 
-function Home({firstName, lastName, username, title, emails, setFirstName, setLastName, setUsername, setPassword, setTitle, setEmails}) {
+function Home({firstName, lastName, username, title, emails, emailID, setFirstName, setLastName, setUsername, setPassword, setTitle, setEmails, setEmailID}) {
 
   const navigate = useNavigate();
   const [popup, showPopup] = useState(false);
+  const [selectedEmail, setSelectedEmail] = useState([]);
 
   function handleSignOut() {
     setFirstName("");
@@ -264,17 +265,24 @@ function Home({firstName, lastName, username, title, emails, setFirstName, setLa
     navigate("/");
   }
 
-  function viewEmail(event) {
+  function viewDetails(event) {
+    showPopup(false);
+    setEmailID(event.target.value);
+    navigate(`/email?id=${event.target.value}`);
+  }
+
+  function viewRequest(event) {
     showPopup(true);
     event.preventDefault();
 
-    let url = `http://localhost:3000/home?title=${title}`
+    console.log("Emails:" + event.target.value);
+    let url = `http://localhost:3000/home?title=${title}&id=${event.target.value}`
 
     fetch(url)
     .then(response => response.json())
     .then(result => {
-      console.log(result.emails);  
-      setEmails(result.emails);
+      console.log(result.emails[0][0]); 
+      setSelectedEmail(result.emails[0]);
     })
   }
 
@@ -354,9 +362,10 @@ function Home({firstName, lastName, username, title, emails, setFirstName, setLa
                     </button>
                   </div>
                   <div className={`modal-body`}>
-                    {emails.map((email, index) => {
+                    {selectedEmail.map((email, index) => {
                       return (
                         <div key={index}>
+                          <p className={`fw-bold`}>Email ID: </p><p>{email.ID}</p><br />
                           <p className={`fw-bold`}>From: </p><p>{email.From}</p><br />
                           <p className={`fw-bold`}>To: </p><p>{email.To}</p><br />
                           <p className={`fw-bold`}>Subject: </p><p>{email.Subject}</p><br />
@@ -376,6 +385,7 @@ function Home({firstName, lastName, username, title, emails, setFirstName, setLa
           <table className={`table table-hover`}>
             <thead>
               <tr>
+                <th>ID</th>
                 <th>From</th>
                 <th>Subject</th>
                 <th>Action</th>
@@ -385,6 +395,7 @@ function Home({firstName, lastName, username, title, emails, setFirstName, setLa
               {emails.map((email, index) => {
                   return (
                     <tr key={index}>
+                      <td>{email.ID}</td>
                       <td>{email.From}</td>
                       <td>{email.Subject}</td>
                       <td>
@@ -392,7 +403,8 @@ function Home({firstName, lastName, username, title, emails, setFirstName, setLa
                         Action
                       </button>
                       <ul className={`dropdown-menu`}>
-                        <li><button type="button" className={`dropdown-item`} onClick={viewEmail}>View Email</button></li>
+                        <li><button type="button" className={`dropdown-item`} value={email.ID} onClick={viewRequest}>View Request</button></li>
+                        <li><button type="button" className={`dropdown-item`} value={email.ID} onClick={viewDetails}>View Details</button></li>
                       </ul>
                       </td>
                     </tr>
@@ -620,6 +632,7 @@ function AppWrapper() {
   const [password, setPassword] = useState("");
   const [title, setTitle] = useState(false);
   const [emails, setEmails] = useState([]);
+  const [emailID, setEmailID] = useState("");
 
   useEffect(() => {
       document.title = "CRTS";
@@ -631,9 +644,9 @@ function AppWrapper() {
     <Routes>
       <Route path="/" element={<Login username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
       <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
-      <Route path="/home" element={<Home firstName={fname} lastName={lname} username={username} title={title} emails={emails} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle} setEmails={setEmails}/>}></Route>
+      <Route path="/home" element={<Home firstName={fname} lastName={lname} username={username} title={title} emails={emails} emailID={emailID} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle} setEmails={setEmails} setEmailID={setEmailID}/>}></Route>
       <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} title={title} setFirstName={setFirstName} setLastName={setLastName}/>}></Route>
-      <Route path="/email" element={<Email firstName={fname} lastName={lname} username={username} title={title} emails={emails} setEmails={setEmails}/>}></Route>
+      <Route path="/email" element={<Email firstName={fname} lastName={lname} username={username} title={title} emails={emails} emailID={emailID} setEmails={setEmails} setEmailID={setEmailID}/>}></Route>
     </Routes>
   </BrowserRouter>
   );

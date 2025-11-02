@@ -52,6 +52,9 @@ const emailSchema = new mongoose.Schema({
     },
     From : {
       type : Array
+    },
+    ID : {
+      type : String
     }
 })
 
@@ -158,19 +161,25 @@ app.get("/update", (req, res) => {
 });
 
 app.get("/home", (req, res) => {
-  if(req.query.title) {
+  if(req.query.id) {
+    console.log("ID RECEIVED: " + req.query.id);
+    email.find({ID:req.query.id}).then((emailDoc) => {
+      res.json({emails:[emailDoc]});
+    })
+  } else {
+    console.log("ID NOT RECEIVED");
     email.find({}).then((emails) => {
       res.json({emails});
-      console.log(emails);
     })
   }
 });
 
 app.get("/email", (req, res) => {
+  console.log(req.query.id);
   if(req.query.title) {
-    email.find({}).then((emails) => {
-      res.json({emails});
-      console.log(emails);
+    email.find({ID:req.query.id}).then((emailDoc) => {
+      res.json({emails:[emailDoc]});
+      console.log(emailDoc);
     })
   }
 })
