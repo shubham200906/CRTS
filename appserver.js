@@ -1,175 +1,165 @@
 import express from 'express';
-import mongoose from 'mongoose';
+import mysql from 'mysql2';
 import dotenv from 'dotenv';
 import cors from 'cors';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || "7000";
-const MONGOURL = process.env.MONGO_URL;
-
-mongoose.connect(MONGOURL).then(() => {
-  console.log("Database is connected.");
-}).catch((error) => {console.log(error)});
-
 
 app.use(cors({
   origin : "http://localhost:5173"
 }));
 
-const userSchema = new mongoose.Schema({
-  firstname : {
-    type : String,
-    require : true
-  },
-  lastname : {
-    type : String,
-    require : true
-  },
-  username : {
-    type : String,
-    require : true
-  },
-  password : {
-    type : String,
-    require : true
-  },
-  title : {
-    type : Boolean,
-    require : true
+const db = mysql.createConnection({
+  host: "localhost",
+  user: "root",
+  password: "shiv-4me",
+  database: "shubhamdb"
+});
+
+db.connect((err) => {
+  if(err) {
+    console.log("DB Connection Error");
+    process.exit(1);
   }
 });
 
-const emailSchema = new mongoose.Schema({
-    Body : {
-      type : String
-    },
-    Subject : {
-      type : String
-    },
-    To : {
-      type : Array
-    },
-    From : {
-      type : Array
-    },
-    ID : {
-      type : String
-    }
-})
-
-const user = mongoose.model("User", userSchema);
-const email = mongoose.model("Email", emailSchema);
+let sql = "";
+let sql2 = "";
 
 app.get("/", (req, res) => {
-
   console.log("login");
 
-  user.findOne({username:req.query.username}).then((users) => {
+  sql = "SELECT * FROM users WHERE username = ?";
+  db.query(sql, [req.query.username], (err, rows) => {
+    if(err) return res.send("Server Error");
+    if(!rows || rows.length === 0) return res.send("Incorrect Username and Password");
 
-    console.log("Username: " + users.username);
-    console.log("Password: " + users.password);
-    console.log("Title: " + users.title);
-    console.log(users.password == "password");
-
-    if(users) {
-      if(users.title) {
-        console.log("Admin User");
-        return res.send("Admin User: " + users.firstname + " " + users.lastname);
-      } else if(req.query.password == users.password) {
-        console.log("Correct Username and Password " + users.firstname + " " + users.lastname);
-        return res.send("Correct Username and Password " + users.firstname + " " + users.lastname);
-      } else {
-        console.log("Incorrect Password");
-        return res.send("Incorrect Password");
-      }
-    } else {
-      user.findOne({password:req.query.password}).then((userPass) => {
-        if(userPass) {
-          console.log("Incorrect Username");
-          return res.send("Incorrect Username");
+    for(let i = 0; i < rows.length; i++) {
+      if(rows[i].username == req.query.username) {
+        console.log(rows[i].title);
+        if(rows[i].title) {
+          console.log("Admin User");
+          return res.send("Admin User: " + rows[i].firstname + " " + rows[i].lastname);
+        } else if(rows[i].password == req.query.password) {
+          console.log("Correct Username and Password " + rows[i].firstname + " " + rows[i].lastname);
+          return res.send("Correct Username and Password " + rows[i].firstname + " " + rows[i].lastname);
         } else {
-          console.log("Incorrect Username and Password");
-          return res.send("Incorrect Username and Password");
+          console.log("Incorrect Password");
+          return res.send("Incorrect Password");
         }
-      })
+      } else {
+        sql2 = "SELECT * FROM users WHERE password = ?";
+        db.query(sql2, [req.query.password], (err2, rows2) => {
+          if(err2) return res.send("Server Error");
+          if(rows2 && rows2.length > 0) {
+            console.log("Incorrect Username");
+            return res.send("Incorrect Username");
+          } else {
+            console.log("Incorrect Username and Password");
+            return res.send("Incorrect Username and Password");
+          }
+        })
+      }
     }
-   })
+  })
 })
 
 app.get("/signup", (req, res) => {
-
   console.log("sign up");
 
   console.log("Firstname: " + req.query.firstname + " ");
   console.log("Lastname: " + req.query.lastname + " ");
   console.log("Username: " + req.query.username + " ");
   console.log("Password: " + req.query.password + " ");
-  console.log("Title: " + req.query.title)
+  console.log("Title: " + req.query.title);
 
-  if(req.query.password.length < 5) {
+  const isAdmin = req.query.title === "true";
+
+  if(!req.query.password || req.query.password.length < 5) {
     return res.send("Password is too short");
   } else {
-    user.findOne({username:req.query.username}).then((users) => {
-    if(users) {
-      return res.send("Username already exists. Please create a different username.");
-    } else {
-      const user1 = new user({
-        firstname : req.query.firstname,
-        lastname : req.query.lastname,
-        username : req.query.username,
-        password : req.query.password,
-        title : req.query.title
-      });
-      user1.save();
-      console.log("New User Created");
-      if(req.query.title === "true") {
-        console.log("New Admin User");
-        return res.send("Admin " + req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
-      } else {
-        return res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+    sql = "SELECT * FROM users where username = ?";
+    db.query(sql, [req.query.username], (err, rows) => {
+      if(err) {
+        console.log(err);
+        return res.send("Server Error");
       }
-    }
-  });
+      if(rows && rows.length > 0) {
+        return res.send("Username already exists. Please create a different username.");
+      } else {
+        sql2 = "INSERT INTO users (firstname, lastname, username, password, title) VALUES (?, ?, ?, ?, ?)";
+        db.query(sql2, [req.query.firstname, req.query.lastname, req.query.username, req.query.password, req.query.title], (err2, rows2) => {
+          if(err2) {
+            console.log(err2);
+            return res.send("Server Error");
+          }
+          console.log("New User Created");
+          console.log(isAdmin);
+          if(isAdmin) {
+            console.log("New Admin User");
+            return res.send("Admin " + req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+          } else {
+            return res.send(req.query.firstname + " " + req.query.lastname + " " + req.query.username + " " + req.query.password);
+          }
+        })
+      }
+    });
   }
 });
 
 app.get("/update", (req, res) => {
   if(req.query.searchUser) {
     console.log("Search User: " + req.query.searchUser);
-    user.findOne({username:req.query.searchUser}).then((users) => {
-      res.send(users.firstname + " " + users.lastname + " " + users.password);
+    sql = "SELECT * FROM users WHERE username = ?";
+    db.query(sql, [req.query.searchUser], (err, rows) => {
+      if(err) return res.send("Server Error");
+      if(rows && rows.length > 0) {
+        res.send(rows[0].firstname + " " + rows[0].lastname + " " + rows[0].password);
+      } else {
+        res.send("User not found");
+      }
     })
   } else {
-    user.findOne({username:req.query.username}).then((users) => {
-    if(users) {
-      users.firstname = req.query.firstname;
-      users.lastname = req.query.lastname;
-      users.password = req.query.password;
+    sql = "SELECT * FROM users where username = ?";
+    db.query(sql, [req.query.username], (err2, rows2) => {
+      if(err2) return res.send("Server Error");
+      if(rows2 && rows2.length == 1) {
+        let updateUser = {
+          firstname : req.query.firstname,
+          lastname : req.query.lastname,
+          password : req.query.password
+        }
 
-      users.save().then(() => {
-        console.log("User updated");
-        res.send(users.firstname + " " + users.lastname + " " + users.password);
-      })
-
-    } else {
-      console.log("User not found");
-      res.send("User not found");
-    }
-  });
+        sql2 = "UPDATE users SET firstname = ?, lastname = ?, password = ? WHERE username = ?";
+        db.query(sql2, [updateUser.firstname, updateUser.lastname, updateUser.password, req.query.username], (err3, rows3) => {
+          if(err3) return res.send("Server Error");
+          console.log("User updated");
+          res.send(updateUser.firstname + " " + updateUser.lastname + " " + updateUser.password);
+        })
+      } else {
+        console.log("User not found");
+        res.send("User not found");
+      }
+    })
   }
 });
 
 app.get("/home", (req, res) => {
   if(req.query.id) {
     console.log("ID RECEIVED: " + req.query.id);
-    email.find({ID:req.query.id}).then((emailDoc) => {
-      res.json({emails:[emailDoc]});
+    sql = "SELECT * FROM emails WHERE ID = ?";
+    db.query(sql, [req.query.id], (err, rows) => {
+      console.log(rows);
+      if(err) return res.json({emails: []});
+      res.json({emails: rows});
     })
   } else {
     console.log("ID NOT RECEIVED");
-    email.find({}).then((emails) => {
-      res.json({emails});
+    sql = "SELECT * FROM emails";
+    db.query(sql, (err, rows) => {
+      if(err) return res.json({emails: []});
+      res.json({emails: rows || []});
     })
   }
 });
@@ -177,10 +167,14 @@ app.get("/home", (req, res) => {
 app.get("/email", (req, res) => {
   console.log(req.query.id);
   if(req.query.title) {
-    email.find({ID:req.query.id}).then((emailDoc) => {
-      res.json({emails:[emailDoc]});
-      console.log(emailDoc);
+    sql = "SELECT * FROM emails WHERE ID = ?";
+    db.query(sql, [req.query.id], (err, rows) => {
+      if(err) return res.json({emails: []});
+      res.json({emails: rows || []});
+      console.log(rows);
     })
+  } else {
+    res.send("Invalid Request");
   }
 })
 

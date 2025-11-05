@@ -12,7 +12,7 @@ function Email({firstName, lastName, username, title, emails, emailID, setEmails
       .then(response => response.json())
       .then(result => {
         console.log(result.emails[0]);
-        setEmails(result.emails[0]);
+        setEmails(result.emails);
       })
     }
   }, [title])
@@ -56,9 +56,6 @@ function Email({firstName, lastName, username, title, emails, emailID, setEmails
                 </li>
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
                 </li>
               </ul>
             </div>
@@ -171,9 +168,6 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
                 </li>
-                <li className="nav-item">
-                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
-                </li>
               </ul>
             </div>
           </div>
@@ -229,9 +223,6 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
                 </li>
-                <li className="nav-item">
-                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
-                </li>
               </ul>
             </div>
           </div>
@@ -281,8 +272,8 @@ function Home({firstName, lastName, username, title, emails, emailID, setFirstNa
     fetch(url)
     .then(response => response.json())
     .then(result => {
-      console.log(result.emails[0][0]); 
-      setSelectedEmail(result.emails[0]);
+      console.log(result.emails[0]); 
+      setSelectedEmail(result.emails);
     })
   }
 
@@ -336,9 +327,6 @@ function Home({firstName, lastName, username, title, emails, emailID, setFirstNa
                 </li>
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
                 </li>
                 <li className="nav-item">
                   <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
@@ -454,9 +442,6 @@ function Home({firstName, lastName, username, title, emails, emailID, setFirstNa
                 </li>
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={`/email?title=${title}`} className={`nav-link mb-0 h5`}>Emails</Link>
                 </li>
                 <li className="nav-item">
                   <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
