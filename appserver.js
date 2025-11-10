@@ -73,6 +73,7 @@ app.get("/signup", (req, res) => {
   console.log("Username: " + req.query.username + " ");
   console.log("Password: " + req.query.password + " ");
   console.log("Title: " + req.query.title);
+  console.log("Product: " + req.query.product);
 
   const isAdmin = req.query.title === "true";
 
@@ -88,8 +89,8 @@ app.get("/signup", (req, res) => {
       if(rows && rows.length > 0) {
         return res.send("Username already exists. Please create a different username.");
       } else {
-        sql2 = "INSERT INTO users (firstname, lastname, username, password, title) VALUES (?, ?, ?, ?, ?)";
-        db.query(sql2, [req.query.firstname, req.query.lastname, req.query.username, req.query.password, req.query.title], (err2, rows2) => {
+        sql2 = "INSERT INTO users (firstname, lastname, username, password, product, title) VALUES (?, ?, ?, ?, ?, ?)";
+        db.query(sql2, [req.query.firstname, req.query.lastname, req.query.username, req.query.password, req.query.product, req.query.title], (err2, rows2) => {
           if(err2) {
             console.log(err2);
             return res.send("Server Error");

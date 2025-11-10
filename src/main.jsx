@@ -356,6 +356,7 @@ function Home({firstName, lastName, username, title, emails, emailID, setFirstNa
                           <p className={`fw-bold`}>Email ID: </p><p>{email.ID}</p><br />
                           <p className={`fw-bold`}>From: </p><p>{email.From}</p><br />
                           <p className={`fw-bold`}>To: </p><p>{email.To}</p><br />
+                          <p className={`fw-bold`}>Product: </p><p>{email.Product}</p><br />
                           <p className={`fw-bold`}>Subject: </p><p>{email.Subject}</p><br />
                           <p className={`fw-bold`}>Body: </p><p>{email.Body}</p><br />
                         </div>
@@ -459,7 +460,7 @@ function Home({firstName, lastName, username, title, emails, emailID, setFirstNa
   }
 }
 
-function SignUp({firstName, lastName, username, password, title, setFirstName, setLastName, setUsername, setPassword, setTitle}) {
+function SignUp({firstName, lastName, username, password, product, title, setFirstName, setLastName, setUsername, setPassword, setProduct, setTitle}) {
   const navigate = useNavigate();
 
   const [userTrue, setUserTrue] = useState(true);
@@ -468,7 +469,7 @@ function SignUp({firstName, lastName, username, password, title, setFirstName, s
   function formSubmit(event) {
     event.preventDefault();
 
-    fetch(`http://localhost:3000/signup?firstname=${firstName}&lastname=${lastName}&username=${username}&password=${password}&title=${title}`)
+    fetch(`http://localhost:3000/signup?firstname=${firstName}&lastname=${lastName}&username=${username}&password=${password}&product=${product}&title=${title}`)
     .then(response => response.text())
     .then(result => {
       
@@ -522,18 +523,23 @@ function SignUp({firstName, lastName, username, password, title, setFirstName, s
     setLastName(event.target.value);
   }
 
+  function handleProduct(event) {
+    setProduct(event.target.value);
+  }
+
   function handleAdmin(event) {
     setTitle(event.target.checked);
   }
 
   return (
     <>
-    <h1>CRTS Sign Up</h1><br /><br />
+    <h1>CRTS Sign Up</h1><br />
     <form onSubmit={formSubmit} method="get">
-      <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br /><br />
-      <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br /><br />
-      <label className={`fs-4`}>Email: <input type='email' value={username} onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br /><br />
-      <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom ${passTrue ? "bg-white" : "bg-danger"}`} name="password"/></label><br /><br />
+      <label className={`fs-4`}>First Name: <input type='text' onChange={handleFirstName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="fname"/></label><br />
+      <label className={`fs-4`}>Last Name: <input type='text' onChange={handleLastName} className={`form-control size fs-4 rounded-top rounded-bottom`} name="lname"/></label><br />
+      <label className={`fs-4`}>Email: <input type='email' value={username} onChange={handleUsername} className={`form-control size fs-4 rounded-top rounded-bottom ${userTrue ? "bg-white" : "bg-danger"}`} name="username"/></label><br />
+      <label className={`fs-4`}>Password: <input type='password' value={password} onChange={handlePassword} className={`form-control size fs-4 rounded-top rounded-bottom ${passTrue ? "bg-white" : "bg-danger"}`} name="password"/></label><br />
+      <label className={`fs-4`}>Product: <input type='text' onChange={handleProduct} className={`form-control size fs-4 rounded-top rounded-bottom`} name="product"/></label><br /><br />
       <label className={`fs-4`}><input type="checkbox" name="checkAdmin" onClick={handleAdmin} /> Admin?</label><br /><br />
       <input type='submit' value="Sign Up" className={`btn btn-primary btn-lg size fs-4 button-hover rounded-top rounded-bottom`}/>
     </form>
@@ -618,6 +624,7 @@ function AppWrapper() {
   const [title, setTitle] = useState(false);
   const [emails, setEmails] = useState([]);
   const [emailID, setEmailID] = useState("");
+  const [product, setProduct] = useState("");
 
   useEffect(() => {
       document.title = "CRTS";
@@ -628,7 +635,7 @@ function AppWrapper() {
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
-      <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle}/>}></Route>
+      <Route path="/signup" element={<SignUp firstName={fname} lastName={lname} username={username} password={password} product={product} title={title} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setProduct={setProduct} setTitle={setTitle}/>}></Route>
       <Route path="/home" element={<Home firstName={fname} lastName={lname} username={username} title={title} emails={emails} emailID={emailID} setFirstName={setFirstName} setLastName={setLastName} setUsername={setUsername} setPassword={setPassword} setTitle={setTitle} setEmails={setEmails} setEmailID={setEmailID}/>}></Route>
       <Route path="/update" element={<Update firstName={fname} lastName={lname} username={username} title={title} setFirstName={setFirstName} setLastName={setLastName}/>}></Route>
       <Route path="/email" element={<Email firstName={fname} lastName={lname} username={username} title={title} emails={emails} emailID={emailID} setEmails={setEmails} setEmailID={setEmailID}/>}></Route>
