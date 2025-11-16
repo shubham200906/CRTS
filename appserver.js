@@ -38,7 +38,7 @@ app.get("/", (req, res) => {
     for(let i = 0; i < rows.length; i++) {
       if(rows[i].username == req.query.username) {
         console.log(rows[i].title);
-        if(rows[i].title) {
+        if(rows[i].title === "true") {
           console.log("Admin User");
           return res.send("Admin User: " + rows[i].firstname + " " + rows[i].lastname);
         } else if(rows[i].password == req.query.password) {
@@ -157,25 +157,73 @@ app.get("/home", (req, res) => {
     })
   } else {
     console.log("ID NOT RECEIVED");
-    sql = "SELECT * FROM emails";
-    db.query(sql, (err, rows) => {
-      if(err) return res.json({emails: []});
-      res.json({emails: rows || []});
-    })
+    console.log("Title: " + req.query.title);
+    console.log("Username: " + req.query.username);
+    if(req.query.title === "true") {
+      sql = "SELECT * FROM products";
+      db.query(sql, (err, rows) => {
+        if(err) return res.json({emails: []});
+        res.json({emails: rows || []});
+      })
+    } else {
+      sql = "SELECT * FROM products WHERE username = ?"
+      db.query(sql, [req.query.username], (err, rows) => {
+        if(err) return res.json({emails: []});
+        res.json({emails: rows || []});
+      })
+    }
   }
 });
 
 app.get("/email", (req, res) => {
-  console.log(req.query.id);
-  if(req.query.title) {
-    sql = "SELECT * FROM emails WHERE ID = ?";
+  console.log("Title: " + req.query.title);
+  console.log("Id: " + req.query.id);
+  console.log("Username: " + req.query.username);
+  if(req.query.username && req.query.username !== "null" && req.query.username !== "undefined" && req.query.username !== "") {
+    if(req.query.title === "true") {
+      if(req.query.id && req.query.id !== "null" && req.query.id !== "undefined" && req.query.id !== "") {
+        console.log("TEST");
+        sql = "SELECT * FROM products WHERE ID = ?";
+        db.query(sql, [req.query.id], (err, rows) => {
+          if(err) return res.json({emails: []});
+          console.log(rows);
+          return res.json({emails: rows || []});
+        })
+      } else {
+        console.log("ELSE1");
+        sql = "SELECT * FROM products";
+        db.query(sql, (err, rows) => {
+          if(err) return res.json({emails: []});
+          console.log(rows);
+          return res.json({emails: rows || []});
+        })
+      }
+    } else {
+        console.log("ELSE2");
+        if(req.query.id && req.query.id !== "null" && req.query.id !== "undefined" && req.query.id !== "") {
+        console.log("TEST");
+        sql = "SELECT * FROM products WHERE ID = ?";
+        db.query(sql, [req.query.id], (err, rows) => {
+          if(err) return res.json({emails: []});
+          console.log(rows);
+          return res.json({emails: rows || []});
+        })
+      } else {
+        sql = "SELECT * FROM products WHERE username = ?";
+        db.query(sql, [req.query.username],  (err, rows) => {
+          if(err) return res.json({emails: []});
+          console.log(rows);
+          return res.json({emails: rows || []});
+        })
+      }
+    }
+  } else {
+    sql = "SELECT * FROM products WHERE ID = ?";
     db.query(sql, [req.query.id], (err, rows) => {
       if(err) return res.json({emails: []});
-      res.json({emails: rows || []});
       console.log(rows);
+      return res.json({emails: rows || []});
     })
-  } else {
-    res.send("Invalid Request");
   }
 })
 

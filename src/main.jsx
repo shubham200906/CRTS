@@ -5,76 +5,77 @@ import App from './App.jsx'
 import { BrowserRouter, Routes, Route, useNavigate, useSearchParams, Link } from 'react-router-dom'
 
 function Email({firstName, lastName, username, title, emails, emailID, setEmails, setEmailID}) {
-
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
   useEffect(() => {
-    if(title) {
-      fetch(`http://localhost:3000/email?title=${title}&id=${emailID}`)
-      .then(response => response.json())
-      .then(result => {
-        console.log(result.emails[0]);
-        setEmails(result.emails);
-      })
-    }
-  }, [title])
+    fetch(`http://localhost:3000/email?title=${title}&id=${id}&username=${username}`)
+    .then(response => response.json())
+    .then(result => {
+      console.log("EMAIL ROUTE");
+      console.log("NEW: ", result);
+      console.log(result.emails[0]);
+      setEmails(result.emails);
+    })
+  }, [title, id])
 
-  if(title) {
     return (
       <>
-        <nav className="navbar bg-body-tertiary fixed-top">
-        <div className="container-fluid">
-          <div className={`d-flex w-100 justify-content-end`}>
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasNavbar"
-              aria-controls="offcanvasNavbar"
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-          </div>
-            
-          <div
-            className="offcanvas offcanvas-end"
-            tabIndex="-1"
-            id="offcanvasNavbar"
-            aria-labelledby="offcanvasNavbarLabel"
-          >
-            <div className="offcanvas-header">
-              <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+        <div className="email-page overflow-auto vh-100 p-5 bg-light">
+          <nav className="navbar bg-body-tertiary fixed-top">
+          <div className="container-fluid">
+            <div className={`d-flex w-100 justify-content-end`}>
               <button
+                className="navbar-toggler"
                 type="button"
-                className="btn-close"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-              ></button>
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar"
+                aria-controls="offcanvasNavbar"
+              >
+                <span className="navbar-toggler-icon"></span>
+              </button>
             </div>
-            <div className="offcanvas-body">
-              <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
-                <li className="nav-item">
-                  <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-                </li>
-              </ul>
+              
+            <div
+              className="offcanvas offcanvas-end"
+              tabIndex="-1"
+              id="offcanvasNavbar"
+              aria-labelledby="offcanvasNavbarLabel"
+            >
+              <div className="offcanvas-header">
+                <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="offcanvas"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="offcanvas-body">
+                <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
+                  <li className="nav-item">
+                    <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      {emails.map((email, index) => {
-        return (
-          <div key={index}>
-            <p>Body: {email.Body}</p><br /><br />
-            <p>Subject: {email.Subject}</p>
-            <p>To: {email.To}</p>
-            <p>From: {email.From}</p>
-          </div>
-      )})}
+        {emails.map((email, index) => {
+          return (
+            <div key={index}>
+              <p>Body: {email.Body}</p><br /><br />
+              <p>Subject: {email.Subject}</p>
+              <p>To: {email.To}</p>
+              <p>From: {email.From}</p>
+            </div>
+        )})}
+      </div>
     </>
     )
-  }
 }
 
 function Update({firstName, lastName, username, title, setFirstName, setLastName}) {
@@ -168,6 +169,9 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
                 </li>
+                <li className="nav-item">
+                  <Link to={`/email?title=${title}&username=${username}`} className={`nav-link mb-0 h5`}>View Requests</Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -223,6 +227,9 @@ function Update({firstName, lastName, username, title, setFirstName, setLastName
                 <li className="nav-item">
                   <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
                 </li>
+                <li className="nav-item">
+                  <Link to={`/email?title=${title}&username=${username}`} className={`nav-link mb-0 h5`}>View Requests</Link>
+                </li>
               </ul>
             </div>
           </div>
@@ -259,7 +266,7 @@ function Home({firstName, lastName, username, title, emails, emailID, setFirstNa
   function viewDetails(event) {
     showPopup(false);
     setEmailID(event.target.value);
-    navigate(`/email?id=${event.target.value}`);
+    navigate(`/email?title=${title}&id=${event.target.value}&username=${username}`);
   }
 
   function viewRequest(event) {
@@ -278,187 +285,135 @@ function Home({firstName, lastName, username, title, emails, emailID, setFirstNa
   }
 
   useEffect(() => {
-      if(title) {
-      fetch(`http://localhost:3000/home?title=${title}`)
-      .then(response => response.json())
-      .then(result => {
-        console.log(result.emails);
-        setEmails(result.emails);
-      })
-    }
+    fetch(`http://localhost:3000/home?title=${title}&username=${username}`)
+    .then(response => response.json())
+    .then(result => {
+      console.log("Title?" + title);
+      console.log(result.emails);
+      setEmails(result.emails);
+    })
   }, [title])
 
-  if(title) {
     return (
       <>
-        <nav className="navbar bg-body-tertiary fixed-top">
-        <div className="container-fluid">
-          <div className={`d-flex w-100 justify-content-end`}>
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasNavbar"
-              aria-controls="offcanvasNavbar"
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-          </div>
-            
-          <div
-            className="offcanvas offcanvas-end"
-            tabIndex="-1"
-            id="offcanvasNavbar"
-            aria-labelledby="offcanvasNavbarLabel"
-          >
-            <div className="offcanvas-header">
-              <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+          <nav className="navbar bg-body-tertiary fixed-top">
+          <div className="container-fluid">
+            <div className={`d-flex w-100 justify-content-end`}>
               <button
+                className="navbar-toggler"
                 type="button"
-                className="btn-close"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-              ></button>
+                data-bs-toggle="offcanvas"
+                data-bs-target="#offcanvasNavbar"
+                aria-controls="offcanvasNavbar"
+              >
+                <span className="navbar-toggler-icon"></span>
+              </button>
             </div>
-            <div className="offcanvas-body">
-              <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
-                <li className="nav-item">
-                  <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
-                </li>
-              </ul>
+              
+            <div
+              className="offcanvas offcanvas-end"
+              tabIndex="-1"
+              id="offcanvasNavbar"
+              aria-labelledby="offcanvasNavbarLabel"
+            >
+              <div className="offcanvas-header">
+                <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="offcanvas"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="offcanvas-body">
+                <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
+                  <li className="nav-item">
+                    <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to={`/email?title=${title}&username=${username}`} className={`nav-link mb-0 h5`}>View Requests</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
-        </div>
-      </nav>
-
-        <div>
-          <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
-          {popup && (
-          <>
-            <div className={`modal show d-block`} tabIndex="-1" role="dialog">
-              <div className={`modal-dialog modal-dialog-scrollable modal-lg`}>
-                <div className={'modal-content'}>
-                  <div className={`modal-header`}>
-                    <h5 className={`modal-title`}>Email</h5>
-                    <button type="button" className={`btn-close`} onClick={() => showPopup(false)}>
-                    </button>
-                  </div>
-                  <div className={`modal-body`}>
-                    {selectedEmail.map((email, index) => {
-                      return (
-                        <div key={index}>
-                          <p className={`fw-bold`}>Email ID: </p><p>{email.ID}</p><br />
-                          <p className={`fw-bold`}>From: </p><p>{email.From}</p><br />
-                          <p className={`fw-bold`}>To: </p><p>{email.To}</p><br />
-                          <p className={`fw-bold`}>Product: </p><p>{email.Product}</p><br />
-                          <p className={`fw-bold`}>Subject: </p><p>{email.Subject}</p><br />
-                          <p className={`fw-bold`}>Body: </p><p>{email.Body}</p><br />
-                        </div>
-                      )
-                    })}
-                  </div>
-                  <div className={`modal-footer`}>
-                    <button type="button" className={'btn btn-secondary'} onClick={() => showPopup(false)}>Close</button>
+        </nav>
+        <div className="email-page overflow-auto vh-100 p-5 bg-light">
+          <div>
+            <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
+            {popup && (
+            <>
+              <div className={`modal show d-block`} tabIndex="-1" role="dialog">
+                <div className={`modal-dialog modal-dialog-scrollable modal-lg`}>
+                  <div className={'modal-content'}>
+                    <div className={`modal-header`}>
+                      <h5 className={`modal-title`}>Email</h5>
+                      <button type="button" className={`btn-close`} onClick={() => showPopup(false)}>
+                      </button>
+                    </div>
+                    <div className={`modal-body`}>
+                      {selectedEmail.map((email, index) => {
+                        return (
+                          <div key={index}>
+                            <p className={`fw-bold`}>Email ID: </p><p>{email.ID}</p><br />
+                            <p className={`fw-bold`}>From: </p><p>{email.From}</p><br />
+                            <p className={`fw-bold`}>To: </p><p>{email.To}</p><br />
+                            <p className={`fw-bold`}>Product: </p><p>{email.Product}</p><br />
+                            <p className={`fw-bold`}>Subject: </p><p>{email.Subject}</p><br />
+                            <p className={`fw-bold`}>Body: </p><p>{email.Body}</p><br />
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div className={`modal-footer`}>
+                      <button type="button" className={'btn btn-secondary'} onClick={() => showPopup(false)}>Close</button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-           <div className={`modal-backdrop fade show`}></div>
-          </>)}
-          <table className={`table table-hover`}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>From</th>
-                <th>Subject</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {emails.map((email, index) => {
-                  return (
-                    <tr key={index}>
-                      <td>{email.ID}</td>
-                      <td>{email.From}</td>
-                      <td>{email.Subject}</td>
-                      <td>
-                      <button className={`btn btn-secondary dropdown-toggle`} type="button" data-bs-toggle="dropdown">
-                        Action
-                      </button>
-                      <ul className={`dropdown-menu`}>
-                        <li><button type="button" className={`dropdown-item`} value={email.ID} onClick={viewRequest}>View Request</button></li>
-                        <li><button type="button" className={`dropdown-item`} value={email.ID} onClick={viewDetails}>View Details</button></li>
-                      </ul>
-                      </td>
-                    </tr>
-                  )
-              })}
-            </tbody>
-          </table>
+            <div className={`modal-backdrop fade show`}></div>
+            </>)}
+            <table className={`table table-hover`}>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>From</th>
+                  <th>Subject</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {emails.map((email, index) => {
+                    return (
+                      <tr key={index}>
+                        <td>{email.ID}</td>
+                        <td>{email.From}</td>
+                        <td>{email.Subject}</td>
+                        <td>
+                        <button className={`btn btn-secondary dropdown-toggle`} type="button" data-bs-toggle="dropdown">
+                          Action
+                        </button>
+                        <ul className={`dropdown-menu`}>
+                          <li><button type="button" className={`dropdown-item`} value={email.ID} onClick={viewRequest}>View Request</button></li>
+                          <li><button type="button" className={`dropdown-item`} value={email.ID} onClick={viewDetails}>View Details</button></li>
+                        </ul>
+                        </td>
+                      </tr>
+                    )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </>
     )
-  } else {
-    return (
-      <>
-        <nav className="navbar bg-body-tertiary fixed-top">
-        <div className="container-fluid">
-          <div className={`d-flex w-100 justify-content-end`}>
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#offcanvasNavbar"
-              aria-controls="offcanvasNavbar"
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-          </div>
-            
-          <div
-            className="offcanvas offcanvas-end"
-            tabIndex="-1"
-            id="offcanvasNavbar"
-            aria-labelledby="offcanvasNavbarLabel"
-          >
-            <div className="offcanvas-header">
-              <h5 className="offcanvas-title" id="offcanvasNavbarLabel">Hello, {firstName} {lastName} ({username})</h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="offcanvas"
-                aria-label="Close"
-              ></button>
-            </div>
-            <div className="offcanvas-body">
-              <ul className="navbar-nav justify-content-end flex-grow-1 pe-3">
-                <li className="nav-item">
-                  <Link to={`/home?title=${title}`} className={`nav-link mb-0 h5`}>Home</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={`/update?username=${username}`} className={`nav-link mb-0 h5`}>Update User</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to={`/`} className={`nav-link mb-0 h5`} onClick={handleSignOut}>Sign Out</Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </nav>
-        <div>
-          <h1>Welcome, {firstName} {lastName}.</h1><br /><br />
-        </div>
-      </>
-    );
   }
-}
 
 function SignUp({firstName, lastName, username, password, product, title, setFirstName, setLastName, setUsername, setPassword, setProduct, setTitle}) {
   const navigate = useNavigate();
